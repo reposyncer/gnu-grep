@@ -1530,9 +1530,9 @@ back-references are local to each expression.
 @section Basic vs Extended Regular Expressions
 @cindex basic regular expressions
 
-In basic regular expressions the meta-characters @samp{?}, @samp{+},
-@samp{@{}, @samp{|}, @samp{(}, and @samp{)} lose their special meaning;
-instead use the backslashed versions @samp{\?}, @samp{\+}, @samp{\@{},
+In basic regular expressions the meta-characters @samp{?}, @samp{+}, @samp{@{},
+@samp{@}}, @samp{|}, @samp{(}, and @samp{)} lose their special meaning; instead
+use the backslashed versions @samp{\?}, @samp{\+}, @samp{\@{}, @samp{\@}},
 @samp{\|}, @samp{\(}, and @samp{\)}.
 
 @cindex interval specifications
