@@ -426,20 +426,6 @@ from a single file will all start at the same column,
 this also causes the line number and byte offset (if present)
 to be printed in a minimum size field width.
 .TP
-.BR \-u ", " \-\^\-unix\-byte\-offsets
-Report Unix-style byte offsets.
-This switch causes
-.B grep
-to report byte offsets as if the file were a Unix-style text file,
-i.e., with CR characters stripped off.
-This will produce results identical to running
-.B grep
-on a Unix machine.
-This option has no effect unless
-.B \-b
-option is also used;
-it has no effect on platforms other than MS-DOS and MS-Windows.
-.TP
 .BR \-Z ", " \-\^\-null
 Output a zero byte (the ASCII
 .B NUL

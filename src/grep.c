@@ -2580,8 +2580,8 @@ main (int argc, char **argv)
         break;
 
       case 'u':
-        /* Obsolete option; it has no effect.  FIXME: Diagnose use of
-           this option starting in (say) the year 2020.  */
+        /* Obsolete option; it had no effect; FIXME: remove in 2023  */
+        error (0, 0, _("warning: --unix-byte-offsets (-u) is obsolete"));
         break;
 
       case 'V':

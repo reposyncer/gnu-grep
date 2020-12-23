@@ -2,6 +2,11 @@ GNU grep NEWS                                    -*- outline -*-
 
 * Noteworthy changes in release ?.? (????-??-??) [?]
 
+** Changes in behavior
+
+  Use of the --unix-byte-offsets (-u) option now evokes a warning.
+  Since 3.1, this Windows-only option has had no effect.
+
 ** Bug fixes
 
   Preprocessing N patterns would take at least O(N^2) time when too many
