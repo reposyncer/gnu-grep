@@ -225,7 +225,7 @@ as basic regular expressions (BREs, see below).
 This is the default.
 .TP
 .BR \-P ", " \-\^\-perl\-regexp
-Interpret PATTERNS as Perl-compatible regular expressions (PCREs).
+Interpret I<PATTERNS> as Perl-compatible regular expressions (PCREs).
 This option is experimental when combined with the
 .B \-z
 .RB ( \-\^\-null\-data )
@@ -695,7 +695,7 @@ options match, a file is included unless the first such option is
 .BR \-r ", " \-\^\-recursive
 Read all files under each directory, recursively,
 following symbolic links only if they are on the command line.
-Note that if no file operand is given, grep searches the working directory.
+Note that if no file operand is given, B<grep> searches the working directory.
 This is equivalent to the
 .B "\-d recurse"
 option.
@@ -761,8 +761,8 @@ In other implementations, basic regular expressions are less powerful.
 The following description applies to extended regular expressions;
 differences for basic regular expressions are summarized afterwards.
 Perl-compatible regular expressions give additional functionality, and are
-documented in pcresyntax(3) and pcrepattern(3), but work only if
-PCRE is available in the system.
+documented in B<pcresyntax>(3) and B<pcrepattern>(3), but work only if
+PCRE support is enabled.
 .PP
 The fundamental building blocks are the regular expressions
 that match a single character.
@@ -1370,7 +1370,7 @@ from the globbing syntax that the shell uses to match file names.
 .BR pcrepattern (3),
 .BR terminfo (5),
 .BR glob (7),
-.BR regex (7).
+.BR regex (7)
 .SS "Full Documentation"
 A
 .UR https://www.gnu.org/software/grep/manual/
