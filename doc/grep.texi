@@ -1208,8 +1208,8 @@ The fundamental building blocks are the regular expressions that match
 a single character.
 Most characters, including all letters and digits,
 are regular expressions that match themselves.
-Any meta-character
-with special meaning may be quoted by preceding it with a backslash.
+The special characters @samp{.?*+@{|()[\^$}, unless quoted by being
+preceded by a backslash, have the following uses.
 
 @opindex .
 @cindex dot
@@ -1217,8 +1217,10 @@ with special meaning may be quoted by preceding it with a backslash.
 The period @samp{.} matches any single character.
 It is unspecified whether @samp{.} matches an encoding error.
 
+@cindex interval expressions
 A regular expression may be followed by one of several
-repetition operators:
+repetition operators; the operators beginning with @samp{@{}
+are called @dfn{interval expressions}.
 
 @table @samp
 
@@ -1226,19 +1228,19 @@ repetition operators:
 @opindex ?
 @cindex question mark
 @cindex match expression at most once
-The preceding item is optional and will be matched at most once.
+The preceding item is optional and is matched at most once.
 
 @item *
 @opindex *
 @cindex asterisk
 @cindex match expression zero or more times
-The preceding item will be matched zero or more times.
+The preceding item is matched zero or more times.
 
 @item +
 @opindex +
 @cindex plus sign
 @cindex match expression one or more times
-The preceding item will be matched one or more times.
+The preceding item is matched one or more times.
 
 @item @{@var{n}@}
 @opindex @{@var{n}@}
@@ -1421,7 +1423,7 @@ the assumption that you did not intend to search for the nominally
 equivalent regular expression: @samp{[:epru]}.
 Set the @env{POSIXLY_CORRECT} environment variable to disable this feature.
 
-Most meta-characters lose their special meaning inside bracket expressions.
+Special characters lose their special meaning inside bracket expressions.
 
 @table @samp
 @item ]
@@ -1463,6 +1465,8 @@ character a list item, place it anywhere but first.
 @section The Backslash Character and Special Expressions
 @cindex backslash
 
+The @samp{\} character followed by a special character is a regular
+expression that matches the special character.
 The @samp{\} character,
 when followed by certain ordinary characters,
 takes a special meaning:
@@ -1502,7 +1506,7 @@ For example, @samp{\brat\b} matches the separate word @samp{rat},
 @section Anchoring
 @cindex anchoring
 
-The caret @samp{^} and the dollar sign @samp{$} are meta-characters that
+The caret @samp{^} and the dollar sign @samp{$} are special characters that
 respectively match the empty string at the beginning and end of a line.
 They are termed @dfn{anchors}, since they force the match to be ``anchored''
 to beginning or end of a line, respectively.
@@ -1530,20 +1534,21 @@ back-references are local to each expression.
 @section Basic vs Extended Regular Expressions
 @cindex basic regular expressions
 
-In basic regular expressions the meta-characters @samp{?}, @samp{+}, @samp{@{},
-@samp{@}}, @samp{|}, @samp{(}, and @samp{)} lose their special meaning; instead
-use the backslashed versions @samp{\?}, @samp{\+}, @samp{\@{}, @samp{\@}},
-@samp{\|}, @samp{\(}, and @samp{\)}.
+In basic regular expressions the special characters @samp{?}, @samp{+},
+@samp{@{}, @samp{|}, @samp{(}, and @samp{)} lose their special meaning;
+instead use the backslashed versions @samp{\?}, @samp{\+}, @samp{\@{},
+@samp{\|}, @samp{\(}, and @samp{\)}.  Also, a backslash is needed
+before an interval expression's closing @samp{@}}.
 
-@cindex interval specifications
-Traditional @command{egrep} did not support the @samp{@{} meta-character,
-and some @command{egrep} implementations support @samp{\@{} instead, so
+@cindex interval expressions
+Traditional @command{egrep} did not support interval expressions and
+some @command{egrep} implementations use @samp{\@{} and @samp{\@}} instead, so
 portable scripts should avoid @samp{@{} in @samp{grep@ -E} patterns and
 should use @samp{[@{]} to match a literal @samp{@{}.
 
 GNU @command{grep@ -E} attempts to support traditional usage by
 assuming that @samp{@{} is not special if it would be the start of an
-invalid interval specification.
+invalid interval expression.
 For example, the command
 @samp{grep@ -E@ '@{1'} searches for the two-character string @samp{@{1}
 instead of reporting a syntax error in the regular expression.
