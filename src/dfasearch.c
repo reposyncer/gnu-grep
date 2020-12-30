@@ -154,7 +154,7 @@ regex_compile (struct dfa_comp *dc, char const *p, ptrdiff_t len,
   pat->allocated = 0;
 
   /* Do not use a fastmap with -i, to work around glibc Bug#20381.  */
-  pat->fastmap = syntax_only | match_icase ? NULL : xmalloc (UCHAR_MAX + 1);
+  pat->fastmap = (syntax_only | match_icase) ? NULL : xmalloc (UCHAR_MAX + 1);
 
   pat->translate = NULL;
 
