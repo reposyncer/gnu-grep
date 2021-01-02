@@ -1204,12 +1204,12 @@ pages, but work only if PCRE is available in the system.
 @node Fundamental Structure
 @section Fundamental Structure
 
-The fundamental building blocks are the regular expressions that match
-a single character.
-Most characters, including all letters and digits,
-are regular expressions that match themselves.
-The special characters @samp{.?*+@{|()[\^$}, unless quoted by being
-preceded by a backslash, have the following uses.
+@cindex ordinary characters
+@cindex special characters
+In regular expressions, the characters @samp{.?*+@{|()[\^$} are
+@dfn{special characters} and have uses described below.  All other
+characters are @dfn{ordinary characters}, and each ordinary character
+is a regular expression that matches itself.
 
 @opindex .
 @cindex dot
@@ -1516,14 +1516,17 @@ to beginning or end of a line, respectively.
 @cindex subexpression
 @cindex back-reference
 
-The back-reference @samp{\@var{n}}, where @var{n} is a single digit, matches
+The back-reference @samp{\@var{n}},
+where @var{n} is a single nonzero digit, matches
 the substring previously matched by the @var{n}th parenthesized subexpression
 of the regular expression.
 For example, @samp{(a)\1} matches @samp{aa}.
-When used with alternation, if the group does not participate in the match then
-the back-reference makes the whole match fail.
-For example, @samp{a(.)|b\1}
-will not match @samp{ba}.
+If the parenthesized subexpression does not participate in the match,
+the back-reference makes the whole match fail;
+for example, @samp{(a)*\1} fails to match @samp{a}.
+If the parenthesized subexpression matches more than one substring,
+the back-reference refers to the last matched substring;
+for example, @samp{^(ab*)*\1$} matches @samp{ababbabb} but not @samp{ababbab}.
 When multiple regular expressions are given with
 @option{-e} or from a file (@samp{-f @var{file}}),
 back-references are local to each expression.
@@ -1534,17 +1537,43 @@ back-references are local to each expression.
 @section Basic vs Extended Regular Expressions
 @cindex basic regular expressions
 
-In basic regular expressions the special characters @samp{?}, @samp{+},
+In basic regular expressions the characters @samp{?}, @samp{+},
 @samp{@{}, @samp{|}, @samp{(}, and @samp{)} lose their special meaning;
 instead use the backslashed versions @samp{\?}, @samp{\+}, @samp{\@{},
 @samp{\|}, @samp{\(}, and @samp{\)}.  Also, a backslash is needed
-before an interval expression's closing @samp{@}}.
+before an interval expression's closing @samp{@}}, and an unmatched
+@code{\)} is invalid.
+
+Portable scripts should avoid the following constructs, as
+POSIX says they produce undefined results:
+
+@itemize @bullet
+@item
+Extended regular expressions that use back-references.
+@item
+Basic regular expressions that use @samp{\?}, @samp{\+}, or @samp{\|}.
+@item
+Empty parenthesized regular expressions like @samp{()}.
+@item
+Empty alternatives (as in, e.g, @samp{a|}).
+@item
+Repetition operators that immediately follow empty expressions,
+unescaped @samp{$}, or other repetition operators.
+@item
+A backslash escaping an ordinary character (e.g., @samp{\S}),
+unless it is a back-reference.
+@item
+An unescaped @samp{[} that is not part of a bracket expression.
+@item
+In extended regular expressions, an unescaped @samp{@{} that is not
+part of an interval expression.
+@end itemize
 
 @cindex interval expressions
 Traditional @command{egrep} did not support interval expressions and
 some @command{egrep} implementations use @samp{\@{} and @samp{\@}} instead, so
-portable scripts should avoid @samp{@{} in @samp{grep@ -E} patterns and
-should use @samp{[@{]} to match a literal @samp{@{}.
+portable scripts should avoid interval expressions in @samp{grep@ -E} patterns
+and should use @samp{[@{]} to match a literal @samp{@{}.
 
 GNU @command{grep@ -E} attempts to support traditional usage by
 assuming that @samp{@{} is not special if it would be the start of an
@@ -1865,11 +1894,8 @@ Why is this back-reference failing?
 echo 'ba' | grep -E '(a)\1|b\1'
 @end example
 
-This gives no output, because the first alternate @samp{(a)\1} does not match,
-as there is no @samp{aa} in the input, so the @samp{\1} in the second alternate
+This outputs an error message, because the second @samp{\1}
 has nothing to refer back to, meaning it will never match anything.
-(The second alternate in this example can only match
-if the first alternate has matched---making the second one superfluous.)
 
 @item
 How can I match across lines?
