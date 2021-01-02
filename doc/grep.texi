@@ -2029,7 +2029,7 @@ and memory to explore.  Also, the POSIX specification for
 back-references is at times unclear.  Furthermore, many regular
 expression implementations have back-reference bugs that can cause
 programs to return incorrect answers or even crash, and fixing these
-bugs has often been low-priority: for example, as of 2020 the
+bugs has often been low-priority: for example, as of 2021 the
 @url{https://sourceware.org/bugzilla/,GNU C library bug database}
 contained back-reference bugs
 @url{https://sourceware.org/bugzilla/show_bug.cgi?id=52,,52},
