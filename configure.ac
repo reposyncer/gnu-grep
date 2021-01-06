@@ -157,6 +157,13 @@ if test "$gl_gcc_warnings" = yes; then
   nw="$nw -Wsuggest-attribute=format"
   nw="$nw -Wformat-truncation=2"    # False alarm in strerror_r.c
   nw="$nw -Wold-style-definition"
+
+  # Disable to avoid warnings in e.g., test-intprops.c and test-limits-h.c
+  # due to overlong expansions like this:
+  # test-intprops.c:147:5: error: string literal of length 9531 exceeds \
+  # maximum length 4095 that ISO C99 compilers are required to support
+  nw="$nw -Woverlength-strings"
+
   gl_MANYWARN_COMPLEMENT([GNULIB_TEST_WARN_CFLAGS],
                          [$GNULIB_WARN_CFLAGS], [$nw])
   gl_WARN_ADD([-Wno-return-type], [GNULIB_TEST_WARN_CFLAGS])
