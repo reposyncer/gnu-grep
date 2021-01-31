@@ -323,7 +323,6 @@ which only covers the color for matched text.
 Suppress normal output;
 instead print the name of each input file from which
 no output would normally have been printed.
-The scanning of each file stops on the first match.
 
 @item -l
 @itemx --files-with-matches
@@ -333,7 +332,7 @@ The scanning of each file stops on the first match.
 Suppress normal output;
 instead print the name of each input file from which
 output would normally have been printed.
-The scanning of each file stops on the first match.
+Scanning each input file stops upon first match.
 (@option{-l} is specified by POSIX.)
 
 @item -m @var{num}
