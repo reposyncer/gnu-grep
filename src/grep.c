@@ -2048,6 +2048,8 @@ Context control:\n\
 "));
       printf (_("\
   -NUM                      same as --context=NUM\n\
+      --group-separator=SEP  print SEP on line between matches with context\n\
+      --no-group-separator  do not print separator for matches with context\n\
       --color[=WHEN],\n\
       --colour[=WHEN]       use markers to highlight the matching strings;\n\
                             WHEN is 'always', 'never', or 'auto'\n\
