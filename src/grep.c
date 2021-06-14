@@ -880,9 +880,9 @@ enum { INITIAL_BUFSIZE = 96 * 1024 };
 /* Return VAL aligned to the next multiple of ALIGNMENT.  VAL can be
    an integer or a pointer.  Both args must be free of side effects.  */
 #define ALIGN_TO(val, alignment) \
-  ((size_t) (val) % (alignment) == 0 \
+  ((uintptr_t) (val) % (alignment) == 0 \
    ? (val) \
-   : (val) + ((alignment) - (size_t) (val) % (alignment)))
+   : (val) + ((alignment) - (uintptr_t) (val) % (alignment)))
 
 /* Add two numbers that count input bytes or lines, and report an
    error if the addition overflows.  */
