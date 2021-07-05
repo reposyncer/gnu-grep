@@ -376,7 +376,7 @@ EGexecute (void *vdc, char const *buf, size_t size, size_t *match_size,
                                           buflim - beg + dc->begline,
                                           &kwsm, true);
               if (offset < 0)
-                goto failure;
+                return offset;
               match = beg + offset;
               prev_beg = beg;
 
@@ -579,7 +579,6 @@ EGexecute (void *vdc, char const *buf, size_t size, size_t *match_size,
           }
     } /* for (beg = end ..) */
 
- failure:
   return -1;
 
  success:
