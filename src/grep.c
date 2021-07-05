@@ -943,15 +943,8 @@ fillbuf (size_t save, struct stat const *st)
   char *readbuf;
   size_t readsize;
 
-  /* Offset from start of buffer to start of old stuff
-     that we want to save.  */
-  size_t saved_offset = buflim - save - buffer;
-
   if (pagesize <= buffer + bufalloc - sizeof (uword) - buflim)
-    {
-      readbuf = buflim;
-      bufbeg = buflim - save;
-    }
+    readbuf = buflim;
   else
     {
       size_t minsize = save + pagesize;
@@ -989,15 +982,16 @@ fillbuf (size_t save, struct stat const *st)
 
       newbuf = bufalloc < newalloc ? xmalloc (bufalloc = newalloc) : buffer;
       readbuf = ALIGN_TO (newbuf + 1 + save, pagesize);
-      bufbeg = readbuf - save;
-      memmove (bufbeg, buffer + saved_offset, save);
-      bufbeg[-1] = eolbyte;
+      size_t moved = save + 1;  /* Move the preceding byte sentinel too.  */
+      memmove (readbuf - moved, buflim - moved, moved);
       if (newbuf != buffer)
         {
           free (buffer);
           buffer = newbuf;
         }
     }
+
+  bufbeg = readbuf - save;
 
   clear_asan_poison ();
 
