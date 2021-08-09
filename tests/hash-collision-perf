@@ -28,8 +28,7 @@ fail=0
 # for digits, which never exhibited a problem with hash collisions.
 n_pat=40000
 while :; do
-  script="BEGIN { for (i = 1; i <= $n_pat; i++) print i }"
-  ${AWK-awk} "$script" < /dev/null > in || framework_failure_
+  seq $n_pat > in || framework_failure_
   small_ms=$(LC_ALL=C user_time_ 1 grep --file=in empty) || fail=1
   test $small_ms -ge 200 && break
   n_pat=$(expr $n_pat '*' 2)
@@ -37,8 +36,7 @@ done
 
 # Now, search for those same digits mapped to A-J.
 # With the PJW-based hash function, this became O(N^2).
-script="BEGIN { for (i = 1; i <= $n_pat; i++) print i }"
-${AWK-awk} "$script" </dev/null | tr 0-9 A-J > in || framework_failure_
+seq $n_pat | tr 0-9 A-J > in || framework_failure_
 large_ms=$(LC_ALL=C user_time_ 1 grep --file=in empty) || fail=1
 
 # Deliberately recording in an unused variable so it
