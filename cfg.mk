@@ -65,7 +65,7 @@ export VERBOSE = yes
 # 1127556 9e
 export XZ_OPT = -6e
 
-old_NEWS_hash = da867d7903ff4936e2ee6c173e20fb63
+old_NEWS_hash = f4973b8b2470d613d782203aac8e8304
 
 # We prefer to spell it back-reference, as POSIX does.
 sc_prohibit_backref:
