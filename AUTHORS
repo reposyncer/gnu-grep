@@ -36,15 +36,20 @@ Sunday's excellent paper on fast string searching describes some of
 the history of the subject, as well as providing exhaustive
 performance analysis of various implementation alternatives.
 The inner loop of GNU grep is similar to Hume & Sunday's recommended
-"Tuned Boyer Moore" inner loop.  See: Hume A, Sunday D.
-Fast string searching. Software Pract Exper. 1991;21(11):1221-48.
-https://doi.org/10.1002/spe.4380211105
+"Tuned Boyer Moore" inner loop (see the Hume & Sunday citation in
+the grep manual's "Performance" chapter).
 
 Arnold Robbins contributed to improve dfa.[ch]. In fact
 it came straight from gawk-3.0.3 with small editing and fixes.
 
-Many folks contributed.  See THANKS; if I omitted someone please
-send me email.
+Norihiro Tanaka contributed many performance improvements and other
+fixes, particularly to multi-byte matchers.
+
+Paul Eggert contributed support for recursive grep, as well as several
+performance improvements such as searching file holes efficiently.
+
+Many other folks contributed.  See THANKS; if someone is omitted
+please file a bug report.
 
 Alain Magloire maintained GNU grep until version 2.5e.
 

@@ -2004,22 +2004,37 @@ used by @command{grep}.
 @item
 Aho AV, Corasick MJ. Efficient string matching: an aid to bibliographic search.
 @emph{CACM}. 1975;18(6):333--40.
-@url{https://dx.doi.org/10.1145/360825.360855}.
+@url{https://doi.org/10.1145/360825.360855}.
 This introduces the Aho--Corasick algorithm.
 
 @item
 Boyer RS, Moore JS. A fast string searching algorithm.
 @emph{CACM}. 1977;20(10):762--72.
-@url{https://dx.doi.org/10.1145/359842.359859}.
+@url{https://doi.org/10.1145/359842.359859}.
 This introduces the Boyer--Moore algorithm.
 
 @item
 Faro S, Lecroq T. The exact online string matching problem: a review
 of the most recent results.
 @emph{ACM Comput Surv}. 2013;45(2):13.
-@url{https://dx.doi.org/10.1145/2431211.2431212}.
+@url{https://doi.org/10.1145/2431211.2431212}.
 This surveys string matching algorithms that might help improve the
 performance of @command{grep} in the future.
+
+@item
+Hakak SI, Kamsin A, Shivakumara P, Gilkar GA, Khan WZ, Imran M.
+Exact string matching algorithms: survey issues, and future research directions.
+@emph{IEEE Access}. 2019;7:69614--37.
+@url{https://doi.org/10.1109/ACCESS.2019.2914071}.
+This survey is more recent than Faro & Lecroq,
+and focuses on taxonomy instead of performance.
+
+@item
+Hume A, Sunday D. Fast string search.
+@emph{Software Pract Exper}. 1991;21(11):1221--48.
+@url{https://doi.org/10.1002/spe.4380211105}.
+This excellent albeit now-dated survey aided the initial development
+of @command{grep}.
 @end itemize
 @frenchspacing off
 
