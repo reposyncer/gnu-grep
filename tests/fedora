@@ -18,7 +18,7 @@ ok ()	{ printf "${G}OK${D}"; }
 fail () { printf "${R}FAIL${D} (See ${U})"; failures=1; }
 
 U=https://bugzilla.redhat.com/show_bug.cgi?id=116909
-printf "fgrep false negatives: "
+printf "grep -F false negatives: "
 cat > 116909.list <<EOF
 a
 b
@@ -59,7 +59,7 @@ if ( timeout --version ) > /dev/null 2>&1; then
   echo foobar | returns_ 124 timeout 10 grep -Fw "" && fail || ok
 
   U=https://bugzilla.redhat.com/show_bug.cgi?id=140781
-  printf 'fgrep hangs on binary files: '
+  printf 'grep -F hangs on binary files: '
   returns_ 124 timeout 10 grep -F grep "$abs_top_builddir/src/grep" \
     > /dev/null && fail || ok
 

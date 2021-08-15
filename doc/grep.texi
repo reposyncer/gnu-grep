@@ -1159,15 +1159,6 @@ combined with the @option{-z} (@option{--null-data}) option, and note that
 
 @end table
 
-In addition,
-two variant programs @command{egrep} and @command{fgrep} are available.
-@command{egrep} is the same as @samp{grep@ -E}.
-@command{fgrep} is the same as @samp{grep@ -F}.
-Direct invocation as either
-@command{egrep} or @command{fgrep} is deprecated,
-but is provided to allow historical applications
-that rely on them to run unmodified.
-
 
 @node Regular Expressions
 @chapter Regular Expressions
@@ -1918,7 +1909,7 @@ before giving it to @command{grep}, or turn to @command{awk},
 designed to operate across lines.
 
 @item
-What do @command{grep}, @command{fgrep}, and @command{egrep} stand for?
+What do @command{grep}, @option{-E}, and @option{-F} stand for?
 
 The name @command{grep} comes from the way line editing was done on Unix.
 For example,
@@ -1930,8 +1921,29 @@ global/regular expression/print
 g/re/p
 @end example
 
-@command{fgrep} stands for Fixed @command{grep};
-@command{egrep} stands for Extended @command{grep}.
+The @option{-E} option stands for Extended @command{grep}.
+The @option{-F} option stands for Fixed @command{grep};
+
+@item
+What happened to @command{egrep} and @command{fgrep}?
+
+7th Edition Unix had commands @command{egrep} and @command{fgrep}
+that were the counterparts of the modern @samp{grep -E} and @samp{grep -F}.
+Although breaking up @command{grep} into three programs was perhaps
+useful on the small computers of the 1970s, @command{egrep} and
+@command{fgrep} were not standardized by POSIX and are no longer needed.
+In the current GNU implementation, @command{egrep} and @command{fgrep}
+issue a warning and then act like their modern counterparts;
+eventually, they are planned to be removed entirely.
+
+If you prefer the old names, you can use use your own substitutes,
+such as a shell script named @command{egrep} with the following
+contents:
+
+@example
+#!/bin/sh
+exec grep -E "$@@"
+@end example
 
 @end enumerate
 
