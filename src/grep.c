@@ -126,7 +126,15 @@ static Hash_table *pattern_table;
 static size_t _GL_ATTRIBUTE_PURE
 hash_pattern (void const *pat, size_t n_buckets)
 {
-  size_t h = 0;
+  /* This uses the djb2 algorithm, except starting with a larger prime
+     in place of djb2's 5381, if size_t is wide enough.  The primes
+     are taken from the primeth recurrence sequence
+     <https://oeis.org/A007097>.  h15, h32 and h64 are the largest
+     sequence members that fit into 15, 32 and 64 bits, respectively.
+     Since any H will do, hashing works correctly on oddball machines
+     where size_t has some other width.  */
+  uint_fast64_t h15 = 5381, h32 = 3657500101, h64 = 4123221751654370051;
+  size_t h = h64 <= SIZE_MAX ? h64 : h32 <= SIZE_MAX ? h32 : h15;
   intptr_t pat_offset = (intptr_t) pat - 1;
   unsigned char const *s = (unsigned char const *) pattern_array + pat_offset;
   for ( ; *s != '\n'; s++)
