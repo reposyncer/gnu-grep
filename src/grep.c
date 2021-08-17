@@ -768,7 +768,7 @@ buf_has_encoding_errors (char *buf, size_t size)
   for (char const *p = buf; (p = skip_easy_bytes (p)) < buf + size; p += clen)
     {
       clen = mbrlen (p, buf + size - p, &mbs);
-      if ((size_t) -2 <= clen)
+      if (MB_LEN_MAX < clen)
         return true;
     }
 
@@ -2234,12 +2234,12 @@ static bool
 contains_encoding_error (char const *pat, size_t patlen)
 {
   mbstate_t mbs = { 0 };
-  size_t i, charlen;
+  size_t charlen;
 
-  for (i = 0; i < patlen; i += charlen)
+  for (size_t i = 0; i < patlen; i += charlen)
     {
       charlen = mb_clen (pat + i, patlen - i, &mbs);
-      if ((size_t) -2 <= charlen)
+      if (MB_LEN_MAX < charlen)
         return true;
     }
   return false;

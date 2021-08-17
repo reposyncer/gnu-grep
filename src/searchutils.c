@@ -68,8 +68,8 @@ kwsinit (bool mb_trans)
 
    When returning zero, set *MB_START to CUR.  When returning a
    positive value, set *MB_START to the next boundary after CUR,
-   or to END if there is no such boundary, and set *MBCLEN to the
-   length of the preceding character.  */
+   or to END if there is no such boundary, and if MBCLEN is nonnull
+   set *MBCLEN to the length of the preceding character.  */
 ptrdiff_t
 mb_goback (char const **mb_start, size_t *mbclen, char const *cur,
            char const *end)
@@ -92,7 +92,7 @@ mb_goback (char const **mb_start, size_t *mbclen, char const *cur,
             {
               mbstate_t mbs = { 0 };
               clen = mb_clen (cur - i, end - (cur - i), &mbs);
-              if (i < clen && clen < (size_t) -2)
+              if (i < clen && clen <= MB_LEN_MAX)
                 {
                   p0 = cur - i;
                   p = p0 + clen;
@@ -107,7 +107,7 @@ mb_goback (char const **mb_start, size_t *mbclen, char const *cur,
         {
           clen = mb_clen (p, end - p, &mbs);
 
-          if ((size_t) -2 <= clen)
+          if (MB_LEN_MAX < clen)
             {
               /* An invalid sequence, or a truncated multibyte character.
                  Treat it as a single byte character.  */

@@ -78,8 +78,8 @@ extern void fgrep_to_grep_pattern (char **, size_t *);
 SEARCH_INLINE size_t
 mb_clen (char const *s, size_t n, mbstate_t *mbs)
 {
-  size_t len = localeinfo.sbclen[to_uchar (*s)];
-  return len == (size_t) -2 ? mbrlen (s, n, mbs) : len;
+  signed char len = localeinfo.sbclen[to_uchar (*s)];
+  return len == -2 ? mbrlen (s, n, mbs) : len;
 }
 
 extern char const *input_filename (void);
