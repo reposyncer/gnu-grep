@@ -398,6 +398,9 @@ Quiet; do not write anything to standard output.
 Exit immediately with zero status if any match is found,
 even if an error was detected.
 Also see the @option{-s} or @option{--no-messages} option.
+Portability note: Solaris 10 @command{grep} lacks @option{-q};
+portable shell scripts typically can redirect standard output to
+@file{/dev/null} instead of using @option{-q}.
 (@option{-q} is specified by POSIX.)
 
 @item -s
@@ -406,18 +409,6 @@ Also see the @option{-s} or @option{--no-messages} option.
 @opindex --no-messages
 @cindex suppress error messages
 Suppress error messages about nonexistent or unreadable files.
-Portability note:
-unlike GNU @command{grep},
-7th Edition Unix @command{grep} did not conform to POSIX,
-because it lacked @option{-q}
-and its @option{-s} option behaved like
-GNU @command{grep}'s @option{-q} option.@footnote{Of course, 7th Edition
-Unix predated POSIX by several years!}
-USG-style @command{grep} also lacked @option{-q}
-but its @option{-s} option behaved like GNU @command{grep}'s.
-Portable shell scripts should avoid both
-@option{-q} and @option{-s} and should redirect
-standard and error output to @file{/dev/null} instead.
 (@option{-s} is specified by POSIX.)
 
 @end table
@@ -1560,14 +1551,8 @@ part of an interval expression.
 @end itemize
 
 @cindex interval expressions
-Traditional @command{egrep} did not support interval expressions and
-some @command{egrep} implementations use @samp{\@{} and @samp{\@}} instead, so
-portable scripts should avoid interval expressions in @samp{grep@ -E} patterns
-and should use @samp{[@{]} to match a literal @samp{@{}.
-
-GNU @command{grep@ -E} attempts to support traditional usage by
-assuming that @samp{@{} is not special if it would be the start of an
-invalid interval expression.
+GNU @samp{grep@ -E} treats @samp{@{} as special
+only if it begins a valid interval expression.
 For example, the command
 @samp{grep@ -E@ '@{1'} searches for the two-character string @samp{@{1}
 instead of reporting a syntax error in the regular expression.
