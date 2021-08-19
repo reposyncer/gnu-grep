@@ -80,7 +80,6 @@ struct kwset
   ptrdiff_t words;		/* Number of words in the trie.  */
   struct trie *trie;		/* The trie itself.  */
   ptrdiff_t mind;		/* Minimum depth of an accepting node.  */
-  ptrdiff_t maxd;		/* Maximum depth of any node.  */
   unsigned char delta[NCHAR];	/* Delta table for rapid search.  */
   struct trie *next[NCHAR];	/* Table of children of the root.  */
   char *target;			/* Target string if there's only one.  */
@@ -144,7 +143,6 @@ kwsalloc (char const *trans)
   kwset->trie->depth = 0;
   kwset->trie->shift = 0;
   kwset->mind = PTRDIFF_MAX;
-  kwset->maxd = -1;
   kwset->target = NULL;
   kwset->trans = trans;
   kwset->kwsexec = acexec;
@@ -303,8 +301,6 @@ kwsincr (kwset_t kwset, char const *text, ptrdiff_t len)
   /* Keep track of the longest and shortest string of the keyword set.  */
   if (trie->depth < kwset->mind)
     kwset->mind = trie->depth;
-  if (trie->depth > kwset->maxd)
-    kwset->maxd = trie->depth;
 }
 
 ptrdiff_t
