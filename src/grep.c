@@ -2477,7 +2477,6 @@ main (int argc, char **argv)
   int matcher = -1;
   int opt;
   int prev_optind, last_recursive;
-  int fread_errno;
   intmax_t default_context;
   FILE *fp;
   exit_failure = EXIT_TROUBLE;
@@ -2648,11 +2647,17 @@ main (int argc, char **argv)
               if (cc == 0)
                 break;
             }
-          fread_errno = errno;
-          if (ferror (fp))
-            die (EXIT_TROUBLE, fread_errno, "%s", optarg);
-          if (fp != stdin)
-            fclose (fp);
+          int err = errno;
+          if (!ferror (fp))
+            {
+              err = 0;
+              if (fp == stdin)
+                clearerr (fp);
+              else if (fclose (fp) != 0)
+                err = errno;
+            }
+          if (err)
+            die (EXIT_TROUBLE, err, "%s", optarg);
           /* Append final newline if file ended in non-newline. */
           if (newkeycc != keycc && keys[newkeycc - 1] != '\n')
             keys[newkeycc++] = '\n';
