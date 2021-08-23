@@ -58,18 +58,35 @@ kwsinit (bool mb_trans)
   return kwsalloc (trans);
 }
 
-/* In the buffer *MB_START, return the number of bytes needed to go
-   back from CUR to the previous boundary, where a "boundary" is the
-   start of a multibyte character or is an error-encoding byte.  The
-   buffer ends at END (i.e., one past the address of the buffer's last
-   byte).  If CUR is already at a boundary, return 0.  If CUR is no
-   larger than *MB_START, return CUR - *MB_START without modifying
-   *MB_START or *MBCLEN.
+/* Return the number of bytes needed to go back to the start of a
+   multibyte character in a buffer.  The buffer starts at *MB_START.
+   (See below for MBCLEN's role.)  The multibyte character contains
+   the byte addressed by CUR.  The buffer ends just before END, which
+   must not be less than CUR.
 
-   When returning zero, set *MB_START to CUR.  When returning a
-   positive value, set *MB_START to the next boundary after CUR,
-   or to END if there is no such boundary, and if MBCLEN is nonnull
-   set *MBCLEN to the length of the preceding character.  */
+   If CUR is no larger than *MB_START, return CUR - *MB_START without
+   modifying *MB_START or dealing with MBCLEN.  Otherwise, update
+   *MB_START to point to the first multibyte character starting on or
+   after CUR, and if MBCLEN is nonnull then deal with MBCLEN as follows:
+
+     - If this function returns 0 and the locale is multibyte and is
+       not UTF-8, set *MBCLEN to the number of bytes in the multibyte
+       character containing the byte addressed by (CUR - 1).
+
+     - Otherwise, possibly set *MBCLEN to an unspecified value.
+
+   *MB_START should point to the start of a multibyte character, or to
+   an encoding-error byte.
+
+   *END should be a sentinel byte - one of '\0', '\r', '\n', '.', '/',
+   which POSIX says cannot be part of any other character.  Also,
+   there should be a byte string immediately before *MB_START that
+   contains a sentinel byte.  This means it is OK to scan backwards
+   before *MB_START as long as the scan stops at a sentinel byte, and
+   similarly it is OK to scan forwards from CUR (without checking END)
+   so long as the scan stops at a sentinel byte.
+
+   Treat encoding errors as if they were single-byte characters.  */
 ptrdiff_t
 mb_goback (char const **mb_start, size_t *mbclen, char const *cur,
            char const *end)
@@ -86,7 +103,7 @@ mb_goback (char const **mb_start, size_t *mbclen, char const *cur,
       p = cur;
       clen = 1;
 
-      if (cur < end && (*cur & 0xc0) == 0x80)
+      if ((*cur & 0xc0) == 0x80)
         for (int i = 1; i <= 3; i++)
           if ((cur[-i] & 0xc0) != 0x80)
             {
