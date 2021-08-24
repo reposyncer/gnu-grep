@@ -93,24 +93,25 @@ mb_goback (char const **mb_start, size_t *mbclen, char const *cur,
 {
   const char *p = *mb_start;
   const char *p0 = p;
-  size_t clen;
 
   if (cur <= p)
     return cur - p;
 
   if (localeinfo.using_utf8)
     {
+      /* UTF-8 permits scanning backward to the previous character.
+         Start by assuming CUR is at a character boundary.  */
       p = cur;
-      clen = 1;
 
       if ((*cur & 0xc0) == 0x80)
         for (int i = 1; i <= 3; i++)
           if ((cur[-i] & 0xc0) != 0x80)
             {
               mbstate_t mbs = { 0 };
-              clen = mb_clen (cur - i, end - (cur - i), &mbs);
+              size_t clen = mb_clen (cur - i, end - (cur - i), &mbs);
               if (i < clen && clen <= MB_LEN_MAX)
                 {
+                  /* This multibyte character contains *CUR.  */
                   p0 = cur - i;
                   p = p0 + clen;
                 }
@@ -119,7 +120,11 @@ mb_goback (char const **mb_start, size_t *mbclen, char const *cur,
     }
   else
     {
+      /* In non-UTF-8 encodings, to find character boundaries one must
+         in general scan forward from the start of the buffer.  */
       mbstate_t mbs = { 0 };
+      size_t clen;
+
       do
         {
           clen = mb_clen (p, end - p, &mbs);
@@ -135,11 +140,12 @@ mb_goback (char const **mb_start, size_t *mbclen, char const *cur,
           p += clen;
         }
       while (p < cur);
+
+      if (mbclen)
+        *mbclen = clen;
     }
 
   *mb_start = p;
-  if (mbclen)
-    *mbclen = clen;
   return p == cur ? 0 : cur - p0;
 }
 
