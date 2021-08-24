@@ -107,13 +107,20 @@ mb_goback (char const **mb_start, size_t *mbclen, char const *cur,
         for (int i = 1; i <= 3; i++)
           if ((cur[-i] & 0xc0) != 0x80)
             {
-              mbstate_t mbs = { 0 };
-              size_t clen = mb_clen (cur - i, end - (cur - i), &mbs);
-              if (i < clen && clen <= MB_LEN_MAX)
+              /* True if the length implied by the putative byte 1 at
+                 CUR[-I] extends at least through *CUR.  */
+              bool long_enough = (~cur[-i] & 0xff) >> (7 - i) == 0;
+
+              if (long_enough)
                 {
-                  /* This multibyte character contains *CUR.  */
-                  p0 = cur - i;
-                  p = p0 + clen;
+                  mbstate_t mbs = { 0 };
+                  size_t clen = mbrlen (cur - i, end - (cur - i), &mbs);
+                  if (clen <= MB_LEN_MAX)
+                    {
+                      /* This multibyte character contains *CUR.  */
+                      p0 = cur - i;
+                      p = p0 + clen;
+                    }
                 }
               break;
             }
