@@ -113,7 +113,7 @@ jit_exec (struct pcre_comp *pc, char const *subject, int search_bytes,
    followed by '\n'.  Return a description of the compiled pattern.  */
 
 void *
-Pcompile (char *pattern, size_t size, reg_syntax_t ignored, bool exact)
+Pcompile (char *pattern, idx_t size, reg_syntax_t ignored, bool exact)
 {
   int e;
   char const *ep;
@@ -202,8 +202,8 @@ Pcompile (char *pattern, size_t size, reg_syntax_t ignored, bool exact)
   return pc;
 }
 
-size_t
-Pexecute (void *vcp, char const *buf, size_t size, size_t *match_size,
+ptrdiff_t
+Pexecute (void *vcp, char const *buf, idx_t size, idx_t *match_size,
           char const *start_ptr)
 {
   int sub[NSUB];

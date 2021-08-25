@@ -48,38 +48,55 @@ typedef signed char mb_len_map_t;
 /* searchutils.c */
 extern void wordinit (void);
 extern kwset_t kwsinit (bool);
-extern size_t wordchars_size (char const *, char const *) _GL_ATTRIBUTE_PURE;
-extern size_t wordchar_next (char const *, char const *) _GL_ATTRIBUTE_PURE;
-extern size_t wordchar_prev (char const *, char const *, char const *)
+extern idx_t wordchars_size (char const *, char const *) _GL_ATTRIBUTE_PURE;
+extern idx_t wordchar_next (char const *, char const *) _GL_ATTRIBUTE_PURE;
+extern idx_t wordchar_prev (char const *, char const *, char const *)
   _GL_ATTRIBUTE_PURE;
-extern ptrdiff_t mb_goback (char const **, size_t *, char const *,
-                            char const *);
+extern ptrdiff_t mb_goback (char const **, idx_t *, char const *, char const *);
 
 /* dfasearch.c */
-extern void *GEAcompile (char *, size_t, reg_syntax_t, bool);
-extern size_t EGexecute (void *, char const *, size_t, size_t *, char const *);
+extern void *GEAcompile (char *, idx_t, reg_syntax_t, bool);
+extern ptrdiff_t EGexecute (void *, char const *, idx_t, idx_t *, char const *);
 
 /* kwsearch.c */
-extern void *Fcompile (char *, size_t, reg_syntax_t, bool);
-extern size_t Fexecute (void *, char const *, size_t, size_t *, char const *);
+extern void *Fcompile (char *, idx_t, reg_syntax_t, bool);
+extern ptrdiff_t Fexecute (void *, char const *, idx_t, idx_t *, char const *);
 
 /* pcresearch.c */
-extern void *Pcompile (char *, size_t, reg_syntax_t, bool);
-extern size_t Pexecute (void *, char const *, size_t, size_t *, char const *);
+extern void *Pcompile (char *, idx_t, reg_syntax_t, bool);
+extern ptrdiff_t Pexecute (void *, char const *, idx_t, idx_t *, char const *);
 
 /* grep.c */
 extern struct localeinfo localeinfo;
-extern void fgrep_to_grep_pattern (char **, size_t *);
+extern void fgrep_to_grep_pattern (char **, idx_t *);
+
+/* Return the number of bytes in the character at the start of S, which
+   is of size N.  N must be positive.  MBS is the conversion state.
+   This acts like mbrlen, except it returns -1 and -2 instead of
+   (size_t) -1 and (size_t) -2.  */
+SEARCH_INLINE ptrdiff_t
+imbrlen (char const *s, idx_t n, mbstate_t *mbs)
+{
+  size_t len = mbrlen (s, n, mbs);
+
+  /* Convert result to ptrdiff_t portably, even on oddball platforms.
+     When optimizing, this typically uses no machine instructions.  */
+  if (len <= MB_LEN_MAX)
+    return len;
+  ptrdiff_t neglen = -len;
+  return -neglen;
+}
 
 /* Return the number of bytes in the character at the start of S, which
    is of size N.  N must be positive.  MBS is the conversion state.
    This acts like mbrlen, except it returns 1 when mbrlen would return 0,
+   it returns -1 and -2 instead of (size_t) -1 and (size_t) -2,
    and it is typically faster because of the cache.  */
-SEARCH_INLINE size_t
-mb_clen (char const *s, size_t n, mbstate_t *mbs)
+SEARCH_INLINE ptrdiff_t
+mb_clen (char const *s, idx_t n, mbstate_t *mbs)
 {
   signed char len = localeinfo.sbclen[to_uchar (*s)];
-  return len == -2 ? mbrlen (s, n, mbs) : len;
+  return len == -2 ? imbrlen (s, n, mbs) : len;
 }
 
 extern char const *input_filename (void);

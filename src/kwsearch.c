@@ -32,11 +32,11 @@ struct kwsearch
      'kwswords (kwset)' when some extra one-character words have been
      appended, one for each troublesome character that will require a
      DFA search.  */
-  ptrdiff_t words;
+  idx_t words;
 
   /* The user's pattern and its size in bytes.  */
   char *pattern;
-  size_t size;
+  idx_t size;
 
   /* The user's pattern compiled as a regular expression,
      or null if it has not been compiled.  */
@@ -47,11 +47,11 @@ struct kwsearch
    followed by '\n'.  Return a description of the compiled pattern.  */
 
 void *
-Fcompile (char *pattern, size_t size, reg_syntax_t ignored, bool exact)
+Fcompile (char *pattern, idx_t size, reg_syntax_t ignored, bool exact)
 {
   kwset_t kwset;
   char *buf = NULL;
-  size_t bufalloc = 0;
+  idx_t bufalloc = 0;
 
   kwset = kwsinit (true);
 
@@ -59,7 +59,7 @@ Fcompile (char *pattern, size_t size, reg_syntax_t ignored, bool exact)
   do
     {
       char const *sep = rawmemchr (p, '\n');
-      ptrdiff_t len = sep - p;
+      idx_t len = sep - p;
 
       if (match_lines)
         {
@@ -70,8 +70,8 @@ Fcompile (char *pattern, size_t size, reg_syntax_t ignored, bool exact)
               if (bufalloc < len + 2)
                 {
                   free (buf);
-                  bufalloc = len + 2;
-                  buf = x2realloc (NULL, &bufalloc);
+                  bufalloc = len;
+                  buf = xpalloc (NULL, &bufalloc, 2, -1, 1);
                   buf[0] = eolbyte;
                 }
               memcpy (buf + 1, p, len);
@@ -88,7 +88,7 @@ Fcompile (char *pattern, size_t size, reg_syntax_t ignored, bool exact)
 
   free (buf);
 
-  ptrdiff_t words = kwswords (kwset);
+  idx_t words = kwswords (kwset);
   kwsprep (kwset);
 
   struct kwsearch *kwsearch = xmalloc (sizeof *kwsearch);
@@ -102,14 +102,14 @@ Fcompile (char *pattern, size_t size, reg_syntax_t ignored, bool exact)
 
 /* Use the compiled pattern VCP to search the buffer BUF of size SIZE.
    If found, return the offset of the first match and store its
-   size into *MATCH_SIZE.  If not found, return SIZE_MAX.
+   size into *MATCH_SIZE.  If not found, return -1.
    If START_PTR is nonnull, start searching there.  */
-size_t
-Fexecute (void *vcp, char const *buf, size_t size, size_t *match_size,
+ptrdiff_t
+Fexecute (void *vcp, char const *buf, idx_t size, idx_t *match_size,
           char const *start_ptr)
 {
   char const *beg, *end, *mb_start;
-  ptrdiff_t len;
+  idx_t len;
   char eol = eolbyte;
   struct kwsearch *kwsearch = vcp;
   kwset_t kwset = kwsearch->kwset;
@@ -126,7 +126,7 @@ Fexecute (void *vcp, char const *buf, size_t size, size_t *match_size,
         break;
       len = kwsmatch.size - 2 * match_lines;
 
-      size_t mbclen = 0;
+      idx_t mbclen = 0;
       if (mb_check
           && mb_goback (&mb_start, &mbclen, beg + offset, buf + size) != 0)
         {
@@ -198,8 +198,8 @@ Fexecute (void *vcp, char const *buf, size_t size, size_t *match_size,
                 else
                   end = buf + size;
 
-                if (EGexecute (kwsearch->re, beg, end - beg, match_size, NULL)
-                    != (size_t) -1)
+                if (0 <= EGexecute (kwsearch->re, beg, end - beg,
+                                    match_size, NULL))
                   goto success_match_words;
                 beg = end - 1;
                 break;

@@ -21,6 +21,7 @@
 #define GREP_GREP_H 1
 
 #include <stdbool.h>
+#include <idx.h>
 
 /* The following flags are exported from grep for the matchers
    to look at. */
@@ -29,6 +30,6 @@ extern bool match_words;	/* -w */
 extern bool match_lines;	/* -x */
 extern char eolbyte;		/* -z */
 
-extern char const *pattern_file_name (size_t, size_t *);
+extern char const *pattern_file_name (idx_t, idx_t *);
 
 #endif

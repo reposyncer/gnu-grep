@@ -88,13 +88,13 @@ struct patloc
   {
     /* Line number of the pattern in PATTERN_ARRAY.  Line numbers
        start at 0, and each pattern is terminated by '\n'.  */
-    ptrdiff_t lineno;
+    idx_t lineno;
 
     /* Input location of the pattern.  The FILENAME "-" represents
        standard input, and "" represents the command line.  FILELINE is
        origin-1 for files and is irrelevant for the command line.  */
     char const *filename;
-    ptrdiff_t fileline;
+    idx_t fileline;
   };
 
 /* The array of pattern locations.  The concatenation of all patterns
@@ -108,13 +108,13 @@ struct patloc
    removed patterns not at a file start or end requires another
    PATLOC entry for the first non-removed pattern.  */
 static struct patloc *patloc;
-static size_t patlocs_allocated, patlocs_used;
+static idx_t patlocs_allocated, patlocs_used;
 
 /* Pointer to the array of patterns, each terminated by newline.  */
 static char *pattern_array;
 
 /* The number of unique patterns seen so far.  */
-static size_t n_patterns;
+static idx_t n_patterns;
 
 /* Hash table of patterns seen so far.  */
 static Hash_table *pattern_table;
@@ -160,16 +160,16 @@ compare_patterns (void const *a, void const *b)
    sequence of patterns with no duplicates; SIZE is the total number
    of bytes in KEYS.  If some patterns past the first DUPFREE_SIZE
    bytes are not duplicates, update PATLOCS accordingly.  */
-static ptrdiff_t
-update_patterns (char *keys, ptrdiff_t dupfree_size, ptrdiff_t size,
+static idx_t
+update_patterns (char *keys, idx_t dupfree_size, idx_t size,
                  char const *filename)
 {
   char *dst = keys + dupfree_size;
-  ptrdiff_t fileline = 1;
+  idx_t fileline = 1;
   int prev_inserted = 0;
 
   char const *srclim = keys + size;
-  ptrdiff_t patsize;
+  idx_t patsize;
   for (char const *src = keys + dupfree_size; src < srclim; src += patsize)
     {
       char const *patend = rawmemchr (src, '\n');
@@ -190,8 +190,8 @@ update_patterns (char *keys, ptrdiff_t dupfree_size, ptrdiff_t size,
           if (!prev_inserted)
             {
               if (patlocs_used == patlocs_allocated)
-                patloc = x2nrealloc (patloc, &patlocs_allocated,
-                                     sizeof *patloc);
+                patloc = xpalloc (patloc, &patlocs_allocated, 1, -1,
+                                  sizeof *patloc);
               patloc[patlocs_used++]
                 = (struct patloc) { .lineno = n_patterns,
                                     .filename = filename,
@@ -213,9 +213,9 @@ update_patterns (char *keys, ptrdiff_t dupfree_size, ptrdiff_t size,
    Set *NEW_LINENO to the origin-1 line number of PATTERN in the file,
    or to an unspecified value if PATTERN came from the command line.  */
 char const * _GL_ATTRIBUTE_PURE
-pattern_file_name (size_t lineno, size_t *new_lineno)
+pattern_file_name (idx_t lineno, idx_t *new_lineno)
 {
-  ptrdiff_t i;
+  idx_t i;
   for (i = 1; i < patlocs_used; i++)
     if (lineno < patloc[i].lineno)
       break;
@@ -227,7 +227,7 @@ pattern_file_name (size_t lineno, size_t *new_lineno)
 /* Record the starting address and length of the sole poisoned region,
    so that we can unpoison it later, just before each following read.  */
 static void const *poison_buf;
-static size_t poison_len;
+static idx_t poison_len;
 
 static void
 clear_asan_poison (void)
@@ -237,7 +237,7 @@ clear_asan_poison (void)
 }
 
 static void
-asan_poison (void const *addr, size_t size)
+asan_poison (void const *addr, idx_t size)
 {
   poison_buf = addr;
   poison_len = size;
@@ -246,7 +246,7 @@ asan_poison (void const *addr, size_t size)
 }
 #else
 static void clear_asan_poison (void) { }
-static void asan_poison (void const volatile *addr, size_t size) { }
+static void asan_poison (void const volatile *addr, idx_t size) { }
 #endif
 
 /* The group separator used when context is requested. */
@@ -467,7 +467,7 @@ printf_errno (char const *format, ...)
 }
 
 static void
-fwrite_errno (void const *ptr, size_t size, size_t nmemb)
+fwrite_errno (void const *ptr, idx_t size, idx_t nmemb)
 {
   if (fwrite (ptr, size, nmemb, stdout) != nmemb)
     stdout_errno = errno;
@@ -644,9 +644,9 @@ static bool seek_failed;
 static bool seek_data_failed;
 
 /* Functions we'll use to search. */
-typedef void *(*compile_fp_t) (char *, size_t, reg_syntax_t, bool);
-typedef size_t (*execute_fp_t) (void *, char const *, size_t, size_t *,
-                                char const *);
+typedef void *(*compile_fp_t) (char *, idx_t, reg_syntax_t, bool);
+typedef ptrdiff_t (*execute_fp_t) (void *, char const *, idx_t, idx_t *,
+                                   char const *);
 static execute_fp_t execute;
 static void *compiled_pattern;
 
@@ -694,6 +694,7 @@ clean_up_stdout (void)
 /* An unsigned type suitable for fast matching.  */
 typedef uintmax_t uword;
 static uword const uword_max = UINTMAX_MAX;
+enum { uword_size = sizeof (uword) }; /* For when a signed size is wanted.  */
 
 struct localeinfo localeinfo;
 
@@ -742,7 +743,7 @@ skip_easy_bytes (char const *buf)
      the buffer end, but that's benign.  */
   char const *p;
   uword const *s;
-  for (p = buf; (uintptr_t) p % sizeof (uword) != 0; p++)
+  for (p = buf; (uintptr_t) p % uword_size != 0; p++)
     if (to_uchar (*p) & unibyte_mask)
       return p;
   for (s = CAST_ALIGNED (uword const *, p); ! (*s & unibyte_mask); s++)
@@ -753,22 +754,22 @@ skip_easy_bytes (char const *buf)
 }
 
 /* Return true if BUF, of size SIZE, has an encoding error.
-   BUF must be followed by at least sizeof (uword) bytes,
+   BUF must be followed by at least uword_size bytes,
    the first of which may be modified.  */
 static bool
-buf_has_encoding_errors (char *buf, size_t size)
+buf_has_encoding_errors (char *buf, idx_t size)
 {
   if (! unibyte_mask)
     return false;
 
   mbstate_t mbs = { 0 };
-  size_t clen;
+  ptrdiff_t clen;
 
   buf[size] = -1;
   for (char const *p = buf; (p = skip_easy_bytes (p)) < buf + size; p += clen)
     {
-      clen = mbrlen (p, buf + size - p, &mbs);
-      if (MB_LEN_MAX < clen)
+      clen = imbrlen (p, buf + size - p, &mbs);
+      if (clen < 0)
         return true;
     }
 
@@ -780,7 +781,7 @@ buf_has_encoding_errors (char *buf, size_t size)
    BUF must be followed by at least one byte,
    which may be arbitrarily written to or read from.  */
 static bool
-buf_has_nulls (char *buf, size_t size)
+buf_has_nulls (char *buf, idx_t size)
 {
   buf[size] = 0;
   return strlen (buf) != size;
@@ -790,7 +791,7 @@ buf_has_nulls (char *buf, size_t size)
    SIZE bytes have already been read from the file
    with descriptor FD and status ST.  */
 static bool
-file_must_have_nulls (size_t size, int fd, struct stat const *st)
+file_must_have_nulls (idx_t size, int fd, struct stat const *st)
 {
   /* If the file has holes, it must contain a null byte somewhere.  */
   if (SEEK_HOLE != SEEK_SET && !seek_failed
@@ -869,18 +870,18 @@ skipped_file (char const *name, bool command_line, bool is_dir)
    page size, unless a read yields a partial page.  */
 
 static char *buffer;		/* Base of buffer. */
-static size_t bufalloc;		/* Allocated buffer size, counting slop. */
+static idx_t bufalloc;		/* Allocated buffer size, counting slop. */
 static int bufdesc;		/* File descriptor. */
 static char *bufbeg;		/* Beginning of user-visible stuff. */
 static char *buflim;		/* Limit of user-visible stuff. */
-static size_t pagesize;		/* alignment of memory pages */
+static idx_t pagesize;		/* alignment of memory pages */
 static off_t bufoffset;		/* Read offset.  */
 static off_t after_last_match;	/* Pointer after last matching line that
                                    would have been output if we were
                                    outputting characters. */
 static bool skip_nuls;		/* Skip '\0' in data.  */
 static bool skip_empty_lines;	/* Skip empty lines in data.  */
-static uintmax_t totalnl;	/* Total newline count before lastnl. */
+static intmax_t totalnl;	/* Total newline count before lastnl. */
 
 /* Initial buffer size, not counting slop. */
 enum { INITIAL_BUFSIZE = 96 * 1024 };
@@ -894,18 +895,18 @@ enum { INITIAL_BUFSIZE = 96 * 1024 };
 
 /* Add two numbers that count input bytes or lines, and report an
    error if the addition overflows.  */
-static uintmax_t
-add_count (uintmax_t a, uintmax_t b)
+static intmax_t
+add_count (intmax_t a, idx_t b)
 {
-  uintmax_t sum = a + b;
-  if (sum < a)
+  intmax_t sum;
+  if (!INT_ADD_OK (a, b, &sum))
     die (EXIT_TROUBLE, 0, _("input is too large to count"));
   return sum;
 }
 
 /* Return true if BUF (of size SIZE) is all zeros.  */
 static bool
-all_zeros (char const *buf, size_t size)
+all_zeros (char const *buf, idx_t size)
 {
   for (char const *p = buf; p < buf + size; p++)
     if (*p)
@@ -944,55 +945,55 @@ reset (int fd, struct stat const *st)
    to the beginning of the buffer contents, and 'buflim'
    points just after the end.  Return false if there's an error.  */
 static bool
-fillbuf (size_t save, struct stat const *st)
+fillbuf (idx_t save, struct stat const *st)
 {
-  size_t fillsize;
-  bool cc = true;
   char *readbuf;
-  size_t readsize;
 
-  if (pagesize <= buffer + bufalloc - sizeof (uword) - buflim)
+  /* After BUFLIM, we need room for at least a page of data plus a
+     trailing uword.  */
+  idx_t min_after_buflim = pagesize + uword_size;
+
+  if (min_after_buflim <= buffer + bufalloc - buflim)
     readbuf = buflim;
   else
     {
-      size_t minsize = save + pagesize;
-      size_t newsize;
-      size_t newalloc;
       char *newbuf;
 
-      /* Grow newsize until it is at least as great as minsize.  */
-      for (newsize = bufalloc - pagesize - sizeof (uword);
-           newsize < minsize;
-           newsize *= 2)
-        if ((SIZE_MAX - pagesize - sizeof (uword)) / 2 < newsize)
-          xalloc_die ();
-
-      /* Try not to allocate more memory than the file size indicates,
-         as that might cause unnecessary memory exhaustion if the file
-         is large.  However, do not use the original file size as a
-         heuristic if we've already read past the file end, as most
-         likely the file is growing.  */
-      if (usable_st_size (st))
-        {
-          off_t to_be_read = st->st_size - bufoffset;
-          off_t maxsize_off = save + to_be_read;
-          if (0 <= to_be_read && to_be_read <= maxsize_off
-              && maxsize_off == (size_t) maxsize_off
-              && minsize <= (size_t) maxsize_off
-              && (size_t) maxsize_off < newsize)
-            newsize = maxsize_off;
-        }
+      /* For data to be searched we need room for the saved bytes,
+         plus at least a page of data to read.  */
+      idx_t minsize = save + pagesize;
 
       /* Add enough room so that the buffer is aligned and has room
          for byte sentinels fore and aft, and so that a uword can
          be read aft.  */
-      newalloc = newsize + pagesize + sizeof (uword);
+      ptrdiff_t incr_min = minsize - bufalloc + min_after_buflim;
 
-      newbuf = bufalloc < newalloc ? xmalloc (bufalloc = newalloc) : buffer;
+      if (incr_min <= 0)
+        newbuf = buffer;
+      else
+        {
+          /* Try not to allocate more memory than the file size indicates,
+             as that might cause unnecessary memory exhaustion if the file
+             is large.  However, do not use the original file size as a
+             heuristic if we've already read past the file end, as most
+             likely the file is growing.  */
+          ptrdiff_t alloc_max = -1;
+          if (usable_st_size (st))
+            {
+              off_t to_be_read = st->st_size - bufoffset;
+              ptrdiff_t a;
+              if (0 <= to_be_read
+                  && INT_ADD_OK (to_be_read, save + min_after_buflim, &a))
+                alloc_max = a;
+            }
+
+          newbuf = xpalloc (NULL, &bufalloc, incr_min, alloc_max, 1);
+        }
+
       readbuf = ALIGN_TO (newbuf + 1 + save, pagesize);
-      size_t moved = save + 1;  /* Move the preceding byte sentinel too.  */
+      idx_t moved = save + 1;  /* Move the preceding byte sentinel too.  */
       memmove (readbuf - moved, buflim - moved, moved);
-      if (newbuf != buffer)
+      if (0 < incr_min)
         {
           free (buffer);
           buffer = newbuf;
@@ -1003,8 +1004,11 @@ fillbuf (size_t save, struct stat const *st)
 
   clear_asan_poison ();
 
-  readsize = buffer + bufalloc - sizeof (uword) - readbuf;
+  idx_t readsize = buffer + bufalloc - uword_size - readbuf;
   readsize -= readsize % pagesize;
+
+  idx_t fillsize;
+  bool cc = true;
 
   while (true)
     {
@@ -1043,12 +1047,11 @@ fillbuf (size_t save, struct stat const *st)
   /* Initialize the following word, because skip_easy_bytes and some
      matchers read (but do not use) those bytes.  This avoids false
      positive reports of these bytes being used uninitialized.  */
-  memset (buflim, 0, sizeof (uword));
+  memset (buflim, 0, uword_size);
 
   /* Mark the part of the buffer not filled by the read or set by
      the above memset call as ASAN-poisoned.  */
-  asan_poison (buflim + sizeof (uword),
-               bufalloc - (buflim - buffer) - sizeof (uword));
+  asan_poison (buflim + uword_size, bufalloc - (buflim - buffer) - uword_size);
 
   return cc;
 }
@@ -1089,7 +1092,7 @@ static char *label = NULL;      /* Fake filename for stdin */
 
 
 /* Internal variables to keep track of byte count, context, etc. */
-static uintmax_t totalcc;	/* Total character count before bufbeg. */
+static intmax_t totalcc;	/* Total character count before bufbeg. */
 static char const *lastnl;	/* Pointer after last newline counted. */
 static char *lastout;		/* Pointer after last character output;
                                    NULL if no character has been output
@@ -1105,7 +1108,7 @@ static bool binary;		/* Use binary rather than text I/O.  */
 static void
 nlscan (char const *lim)
 {
-  size_t newlines = 0;
+  idx_t newlines = 0;
   for (char const *beg = lastnl; beg < lim; beg++)
     {
       beg = memchr (beg, eolbyte, lim - beg);
@@ -1137,16 +1140,16 @@ print_sep (char sep)
 
 /* Print a line number or a byte offset.  */
 static void
-print_offset (uintmax_t pos, const char *color)
+print_offset (intmax_t pos, const char *color)
 {
   pr_sgr_start_if (color);
-  printf_errno ("%*"PRIuMAX, offset_width, pos);
+  printf_errno ("%*"PRIdMAX, offset_width, pos);
   pr_sgr_end_if (color);
 }
 
 /* Print a whole line head (filename, line, byte).  The output data
    starts at BEG and contains LEN bytes; it is followed by at least
-   sizeof (uword) bytes, the first of which may be temporarily modified.
+   uword_size bytes, the first of which may be temporarily modified.
    The output data comes from what is perhaps a larger input line that
    goes until LIM, where LIM[-1] is an end-of-line byte.  Use SEP as
    the separator on output.
@@ -1154,7 +1157,7 @@ print_offset (uintmax_t pos, const char *color)
    Return true unless the line was suppressed due to an encoding error.  */
 
 static bool
-print_line_head (char *beg, size_t len, char const *lim, char sep)
+print_line_head (char *beg, idx_t len, char const *lim, char sep)
 {
   if (binary_files != TEXT_BINARY_FILES)
     {
@@ -1191,7 +1194,7 @@ print_line_head (char *beg, size_t len, char const *lim, char sep)
 
   if (out_byte)
     {
-      uintmax_t pos = add_count (totalcc, beg - bufbeg);
+      intmax_t pos = add_count (totalcc, beg - bufbeg);
       print_offset (pos, byte_num_color);
       print_sep (sep);
     }
@@ -1206,16 +1209,16 @@ static char *
 print_line_middle (char *beg, char *lim,
                    const char *line_color, const char *match_color)
 {
-  size_t match_size;
-  size_t match_offset;
+  idx_t match_size;
+  ptrdiff_t match_offset;
   char *cur;
   char *mid = NULL;
   char *b;
 
   for (cur = beg;
        (cur < lim
-        && ((match_offset = execute (compiled_pattern, beg, lim - beg,
-                                     &match_size, cur)) != (size_t) -1));
+        && 0 <= (match_offset = execute (compiled_pattern, beg, lim - beg,
+                                         &match_size, cur)));
        cur = b + match_size)
     {
       b = beg + match_offset;
@@ -1273,8 +1276,8 @@ print_line_middle (char *beg, char *lim,
 static char *
 print_line_tail (char *beg, const char *lim, const char *line_color)
 {
-  size_t eol_size;
-  size_t tail_size;
+  idx_t eol_size;
+  idx_t tail_size;
 
   eol_size   = (lim > beg && lim[-1] == eolbyte);
   eol_size  += (lim - eol_size > beg && lim[-(1 + eol_size)] == '\r');
@@ -1462,10 +1465,10 @@ grepbuf (char *beg, char const *lim)
 
   for (char *p = beg; p < lim; p = endp)
     {
-      size_t match_size;
-      size_t match_offset = execute (compiled_pattern, p, lim - p,
-                                     &match_size, NULL);
-      if (match_offset == (size_t) -1)
+      idx_t match_size;
+      ptrdiff_t match_offset = execute (compiled_pattern, p, lim - p,
+                                        &match_size, NULL);
+      if (match_offset < 0)
         {
           if (!out_invert)
             break;
@@ -1500,7 +1503,7 @@ static intmax_t
 grep (int fd, struct stat const *st, bool *ineof)
 {
   intmax_t nlines, i;
-  size_t residue, save;
+  idx_t residue, save;
   char oldc;
   char *beg;
   char *lim;
@@ -1540,8 +1543,8 @@ grep (int fd, struct stat const *st, bool *ineof)
   if (align_tabs)
     {
       /* Width is log of maximum number.  Line numbers are origin-1.  */
-      uintmax_t num = usable_st_size (st) ? st->st_size : UINTMAX_MAX;
-      num += out_line && num < UINTMAX_MAX;
+      intmax_t num = usable_st_size (st) ? st->st_size : INTMAX_MAX;
+      num += out_line && num < INTMAX_MAX;
       do
         offset_width++;
       while ((num /= 10) != 0);
@@ -2231,15 +2234,15 @@ parse_grep_colors (void)
 
 /* Return true if PAT (of length PATLEN) contains an encoding error.  */
 static bool
-contains_encoding_error (char const *pat, size_t patlen)
+contains_encoding_error (char const *pat, idx_t patlen)
 {
   mbstate_t mbs = { 0 };
-  size_t charlen;
+  ptrdiff_t charlen;
 
-  for (size_t i = 0; i < patlen; i += charlen)
+  for (idx_t i = 0; i < patlen; i += charlen)
     {
       charlen = mb_clen (pat + i, patlen - i, &mbs);
-      if (MB_LEN_MAX < charlen)
+      if (charlen < 0)
         return true;
     }
   return false;
@@ -2279,8 +2282,8 @@ setup_ok_fold (void)
    Fcompile cannot handle it.  MBS is the multibyte conversion state.
    PATLEN must be nonzero.  */
 
-static int
-fgrep_icase_charlen (char const *pat, size_t patlen, mbstate_t *mbs)
+static ptrdiff_t
+fgrep_icase_charlen (char const *pat, idx_t patlen, mbstate_t *mbs)
 {
   unsigned char pat0 = pat[0];
 
@@ -2302,7 +2305,7 @@ fgrep_icase_charlen (char const *pat, size_t patlen, mbstate_t *mbs)
   wchar_t folded[CASE_FOLDED_BUFSIZE];
   if (case_folded_counterparts (wc, folded))
     return -1;
-  for (int i = wn; 0 < --i; )
+  for (idx_t i = wn; 0 < --i; )
     {
       unsigned char c = pat[i];
       if (toupper (c) != c)
@@ -2317,11 +2320,11 @@ fgrep_icase_charlen (char const *pat, size_t patlen, mbstate_t *mbs)
    and so can be processed by Fcompile.  */
 
 static bool
-fgrep_icase_available (char const *pat, size_t patlen)
+fgrep_icase_available (char const *pat, idx_t patlen)
 {
   mbstate_t mbs = {0,};
 
-  for (size_t i = 0; i < patlen; )
+  for (idx_t i = 0; i < patlen; )
     {
       int n = fgrep_icase_charlen (pat + i, patlen - i, &mbs);
       if (n < 0)
@@ -2335,28 +2338,27 @@ fgrep_icase_available (char const *pat, size_t patlen)
 /* Change the pattern *KEYS_P, of size *LEN_P, from fgrep to grep style.  */
 
 void
-fgrep_to_grep_pattern (char **keys_p, size_t *len_p)
+fgrep_to_grep_pattern (char **keys_p, idx_t *len_p)
 {
-  size_t len = *len_p;
+  idx_t len = *len_p;
   char *keys = *keys_p;
   mbstate_t mb_state = { 0 };
   char *new_keys = xnmalloc (len + 1, 2);
   char *p = new_keys;
-  size_t n;
 
-  for (; len; keys += n, len -= n)
+  for (ptrdiff_t n; len; keys += n, len -= n)
     {
       n = mb_clen (keys, len, &mb_state);
       switch (n)
         {
-        case (size_t) -2:
+        case -2:
           n = len;
           FALLTHROUGH;
         default:
           p = mempcpy (p, keys, n);
           break;
 
-        case (size_t) -1:
+        case -1:
           memset (&mb_state, 0, sizeof mb_state);
           n = 1;
           FALLTHROUGH;
@@ -2385,11 +2387,11 @@ fgrep_to_grep_pattern (char **keys_p, size_t *len_p)
    to the -F pattern "a".  */
 
 static int
-try_fgrep_pattern (int matcher, char *keys, size_t *len_p)
+try_fgrep_pattern (int matcher, char *keys, idx_t *len_p)
 {
   int result = matcher;
-  size_t len = *len_p;
-  char *new_keys = xmalloc (len + 1);
+  idx_t len = *len_p;
+  char *new_keys = ximalloc (len + 1);
   char *p = new_keys;
   char const *q = keys;
   mbstate_t mb_state = { 0 };
@@ -2434,26 +2436,14 @@ try_fgrep_pattern (int matcher, char *keys, size_t *len_p)
           break;
         }
 
-      {
-        size_t n;
-        if (match_icase)
-          {
-            int ni = fgrep_icase_charlen (q, len, &mb_state);
-            if (ni < 0)
-              goto fail;
-            n = ni;
-          }
-        else
-          {
-            n = mb_clen (q, len, &mb_state);
-            if (MB_LEN_MAX < n)
-              goto fail;
-          }
-
-        p = mempcpy (p, q, n);
-        q += n;
-        len -= n;
-      }
+      ptrdiff_t clen = (match_icase
+                        ? fgrep_icase_charlen (q, len, &mb_state)
+                        : mb_clen (q, len, &mb_state));
+      if (clen < 0)
+        goto fail;
+      p = mempcpy (p, q, clen);
+      q += clen;
+      len -= clen;
     }
 
   if (*len_p != p - new_keys)
@@ -2473,7 +2463,7 @@ int
 main (int argc, char **argv)
 {
   char *keys = NULL;
-  size_t keycc = 0, keyalloc = 0;
+  idx_t keycc = 0, keyalloc = 0;
   int matcher = -1;
   int opt;
   int prev_optind, last_recursive;
@@ -2612,12 +2602,10 @@ main (int argc, char **argv)
 
       case 'e':
         {
-          ptrdiff_t cc = strlen (optarg);
-          if (keyalloc < keycc + cc + 1)
-            {
-              keyalloc = keycc + cc + 1;
-              pattern_array = keys = x2realloc (keys, &keyalloc);
-            }
+          idx_t cc = strlen (optarg);
+          ptrdiff_t shortage = keycc - keyalloc + cc + 1;
+          if (0 < shortage)
+            pattern_array = keys = xpalloc (keys, &keyalloc, shortage, -1, 1);
           char *keyend = mempcpy (keys + keycc, optarg, cc);
           *keyend = '\n';
           keycc = update_patterns (keys, keycc, keycc + cc + 1, "");
@@ -2638,11 +2626,13 @@ main (int argc, char **argv)
               if (!fp)
                 die (EXIT_TROUBLE, errno, "%s", optarg);
             }
-          ptrdiff_t newkeycc = keycc, cc;
+          idx_t newkeycc = keycc, cc;
           for (;; newkeycc += cc)
             {
-              if (keyalloc <= newkeycc + 1)
-                pattern_array = keys = x2realloc (keys, &keyalloc);
+              ptrdiff_t shortage = newkeycc - keyalloc + 2;
+              if (0 < shortage)
+                pattern_array = keys = xpalloc (keys, &keyalloc,
+                                                shortage, -1, 1);
               cc = fread (keys + newkeycc, 1, keyalloc - (newkeycc + 1), fp);
               if (cc == 0)
                 break;
@@ -2861,7 +2851,7 @@ main (int argc, char **argv)
     {
       /* Make a copy so that it can be reallocated or freed later.  */
       pattern_array = keys = xstrdup (argv[optind++]);
-      ptrdiff_t patlen = strlen (keys);
+      idx_t patlen = strlen (keys);
       keys[patlen] = '\n';
       keycc = update_patterns (keys, 0, patlen + 1, "");
     }
@@ -2968,7 +2958,7 @@ main (int argc, char **argv)
                                only_matching | color_option);
   /* We need one byte prior and one after.  */
   char eolbytes[3] = { 0, eolbyte, 0 };
-  size_t match_size;
+  idx_t match_size;
   skip_empty_lines = ((execute (compiled_pattern, eolbytes + 1, 1,
                                 &match_size, NULL) == 0)
                       == out_invert);
@@ -2987,11 +2977,11 @@ main (int argc, char **argv)
 #else
   long psize = getpagesize ();
 #endif
-  if (! (0 < psize && psize <= (SIZE_MAX - sizeof (uword)) / 2))
+  if (! (0 < psize && psize <= (IDX_MAX - uword_size) / 2))
     abort ();
   pagesize = psize;
-  bufalloc = ALIGN_TO (INITIAL_BUFSIZE, pagesize) + pagesize + sizeof (uword);
-  buffer = xmalloc (bufalloc);
+  bufalloc = ALIGN_TO (INITIAL_BUFSIZE, pagesize) + pagesize + uword_size;
+  buffer = ximalloc (bufalloc);
 
   if (fts_options & FTS_LOGICAL && devices == READ_COMMAND_LINE_DEVICES)
     devices = READ_DEVICES;

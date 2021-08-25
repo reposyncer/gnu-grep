@@ -36,13 +36,13 @@ struct dfa_comp
 
   /* Regex compiled regexps. */
   struct re_pattern_buffer *patterns;
-  size_t pcount;
+  idx_t pcount;
   struct re_registers regs;
 
   /* Number of compiled fixed strings known to exactly match the regexp.
      If kwsexec returns < kwset_exact_matches, then we don't need to
      call the regexp matcher at all. */
-  ptrdiff_t kwset_exact_matches;
+  idx_t kwset_exact_matches;
 
   bool begline;
 };
@@ -80,9 +80,9 @@ kwsmusts (struct dfa_comp *dc)
          The kwset matcher will return the index of the matching
          string that it chooses. */
       ++dc->kwset_exact_matches;
-      ptrdiff_t old_len = strlen (dm->must);
-      ptrdiff_t new_len = old_len + dm->begline + dm->endline;
-      char *must = xmalloc (new_len);
+      idx_t old_len = strlen (dm->must);
+      idx_t new_len = old_len + dm->begline + dm->endline;
+      char *must = ximalloc (new_len);
       char *mp = must;
       *mp = eolbyte;
       mp += dm->begline;
@@ -108,7 +108,7 @@ kwsmusts (struct dfa_comp *dc)
    BS_SAFE is true of encodings where a backslash cannot appear as the
    last byte of a multibyte character.  */
 static bool _GL_ATTRIBUTE_PURE
-possible_backrefs_in_pattern (char const *keys, ptrdiff_t len, bool bs_safe)
+possible_backrefs_in_pattern (char const *keys, idx_t len, bool bs_safe)
 {
   /* Normally a backslash, but in an unsafe encoding this is a non-char
      value so that the comparison below always fails, because if there
@@ -144,8 +144,8 @@ possible_backrefs_in_pattern (char const *keys, ptrdiff_t len, bool bs_safe)
 }
 
 static bool
-regex_compile (struct dfa_comp *dc, char const *p, ptrdiff_t len,
-               ptrdiff_t pcount, ptrdiff_t lineno, reg_syntax_t syntax_bits,
+regex_compile (struct dfa_comp *dc, char const *p, idx_t len,
+               idx_t pcount, idx_t lineno, reg_syntax_t syntax_bits,
                bool syntax_only)
 {
   struct re_pattern_buffer pat0;
@@ -154,7 +154,9 @@ regex_compile (struct dfa_comp *dc, char const *p, ptrdiff_t len,
   pat->allocated = 0;
 
   /* Do not use a fastmap with -i, to work around glibc Bug#20381.  */
-  pat->fastmap = (syntax_only | match_icase) ? NULL : xmalloc (UCHAR_MAX + 1);
+  verify (UCHAR_MAX < IDX_MAX);
+  idx_t uchar_max = UCHAR_MAX;
+  pat->fastmap = (syntax_only | match_icase) ? NULL : ximalloc (uchar_max + 1);
 
   pat->translate = NULL;
 
@@ -168,14 +170,17 @@ regex_compile (struct dfa_comp *dc, char const *p, ptrdiff_t len,
     return true;
 
   /* Emit a filename:lineno: prefix for patterns taken from files.  */
-  size_t pat_lineno;
+  idx_t pat_lineno;
   char const *pat_filename
     = lineno < 0 ? "" : pattern_file_name (lineno, &pat_lineno);
 
   if (*pat_filename == '\0')
     error (0, 0, "%s", err);
   else
-    error (0, 0, "%s:%zu: %s", pat_filename, pat_lineno, err);
+    {
+      ptrdiff_t n = pat_lineno;
+      error (0, 0, "%s:%td: %s", pat_filename, n, err);
+    }
 
   return false;
 }
@@ -185,7 +190,7 @@ regex_compile (struct dfa_comp *dc, char const *p, ptrdiff_t len,
    Return a description of the compiled pattern.  */
 
 void *
-GEAcompile (char *pattern, size_t size, reg_syntax_t syntax_bits,
+GEAcompile (char *pattern, idx_t size, reg_syntax_t syntax_bits,
             bool exact)
 {
   char *motif;
@@ -210,29 +215,30 @@ GEAcompile (char *pattern, size_t size, reg_syntax_t syntax_bits,
   dc->patterns = xmalloc (sizeof *dc->patterns);
   dc->patterns++;
   dc->pcount = 0;
-  size_t palloc = 1;
+  idx_t palloc = 1;
 
   char const *prev = pattern;
 
   /* Buffer containing back-reference-free patterns.  */
   char *buf = NULL;
-  ptrdiff_t buflen = 0;
-  size_t bufalloc = 0;
+  idx_t buflen = 0;
+  idx_t bufalloc = 0;
 
-  ptrdiff_t lineno = 0;
+  idx_t lineno = 0;
 
   do
     {
       char const *sep = rawmemchr (p, '\n');
-      ptrdiff_t len = sep - p;
+      idx_t len = sep - p;
 
       bool backref = possible_backrefs_in_pattern (p, len, bs_safe);
 
       if (backref && prev < p)
         {
-          ptrdiff_t prevlen = p - prev;
-          while (bufalloc < buflen + prevlen)
-            buf = x2realloc (buf, &bufalloc);
+          idx_t prevlen = p - prev;
+          ptrdiff_t bufshortage = buflen - bufalloc + prevlen;
+          if (0 < bufshortage)
+            buf = xpalloc (buf, &bufalloc, bufshortage, -1, 1);
           memcpy (buf + buflen, prev, prevlen);
           buflen += prevlen;
         }
@@ -240,10 +246,11 @@ GEAcompile (char *pattern, size_t size, reg_syntax_t syntax_bits,
       /* Ensure room for at least two more patterns.  The extra one is
          for the regex_compile that may be executed after this loop
          exits, and its (unused) slot is patterns[-1] until then.  */
-      while (palloc <= dc->pcount + 1)
+      ptrdiff_t shortage = dc->pcount - palloc + 2;
+      if (0 < shortage)
         {
-          dc->patterns = x2nrealloc (dc->patterns - 1, &palloc,
-                                     sizeof *dc->patterns);
+          dc->patterns = xpalloc (dc->patterns - 1, &palloc, shortage, -1,
+                                  sizeof *dc->patterns);
           dc->patterns++;
         }
 
@@ -271,8 +278,8 @@ GEAcompile (char *pattern, size_t size, reg_syntax_t syntax_bits,
     {
       if (pattern < prev)
         {
-          ptrdiff_t prevlen = patlim - prev;
-          buf = xrealloc (buf, buflen + prevlen);
+          idx_t prevlen = patlim - prev;
+          buf = xirealloc (buf, buflen + prevlen);
           memcpy (buf + buflen, prev, prevlen);
           buflen += prevlen;
         }
@@ -298,11 +305,12 @@ GEAcompile (char *pattern, size_t size, reg_syntax_t syntax_bits,
       static char const word_beg_bk[] = "\\(^\\|[^[:alnum:]_]\\)\\(";
       static char const word_end_bk[] = "\\)\\([^[:alnum:]_]\\|$\\)";
       int bk = !(syntax_bits & RE_NO_BK_PARENS);
-      char *n = xmalloc (sizeof word_beg_bk - 1 + size + sizeof word_end_bk);
+      idx_t bracket_bytes = sizeof word_beg_bk - 1 + sizeof word_end_bk;
+      char *n = ximalloc (size + bracket_bytes);
 
       strcpy (n, match_lines ? (bk ? line_beg_bk : line_beg_no_bk)
                              : (bk ? word_beg_bk : word_beg_no_bk));
-      size_t total = strlen (n);
+      idx_t total = strlen (n);
       memcpy (n + total, pattern, size);
       total += size;
       strcpy (n + total, match_lines ? (bk ? line_end_bk : line_end_no_bk)
@@ -338,16 +346,16 @@ GEAcompile (char *pattern, size_t size, reg_syntax_t syntax_bits,
   return dc;
 }
 
-size_t
-EGexecute (void *vdc, char const *buf, size_t size, size_t *match_size,
+ptrdiff_t
+EGexecute (void *vdc, char const *buf, idx_t size, idx_t *match_size,
            char const *start_ptr)
 {
   char const *buflim, *beg, *end, *ptr, *match, *best_match, *mb_start;
   char eol = eolbyte;
   regoff_t start;
-  size_t len, best_len;
+  idx_t len, best_len;
   struct kwsmatch kwsm;
-  size_t i;
+  idx_t i;
   struct dfa_comp *dc = vdc;
   struct dfa *superset = dfasuperset (dc->dfa);
   bool dfafast = dfaisfast (dc->dfa);
@@ -362,7 +370,7 @@ EGexecute (void *vdc, char const *buf, size_t size, size_t *match_size,
       if (!start_ptr)
         {
           char const *next_beg, *dfa_beg = beg;
-          ptrdiff_t count = 0;
+          idx_t count = 0;
           bool exact_kwset_match = false;
           bool backref = false;
 
@@ -584,7 +592,6 @@ EGexecute (void *vdc, char const *buf, size_t size, size_t *match_size,
  success:
   len = end - beg;
  success_in_len:;
-  size_t off = beg - buf;
   *match_size = len;
-  return off;
+  return beg - buf;
 }

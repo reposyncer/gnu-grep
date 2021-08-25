@@ -22,23 +22,26 @@
 #include <stddef.h>
 #include <stdbool.h>
 
+#include <idx.h>
+
 struct kwsmatch
 {
-  ptrdiff_t index;	/* Index number of matching keyword.  */
-  ptrdiff_t offset;	/* Offset of match.  */
-  ptrdiff_t size;	/* Length of match.  */
+  idx_t index;	/* Index number of matching keyword.  */
+  idx_t offset;	/* Offset of match.  */
+  idx_t size;	/* Length of match.  */
 };
 
-#include "arg-nonnull.h"
+#include <arg-nonnull.h>
+#include <idx.h>
 
 struct kwset;
 typedef struct kwset *kwset_t;
 
 extern kwset_t kwsalloc (char const *);
-extern void kwsincr (kwset_t, char const *, ptrdiff_t);
-extern ptrdiff_t kwswords (kwset_t) _GL_ATTRIBUTE_PURE;
+extern void kwsincr (kwset_t, char const *, idx_t);
+extern idx_t kwswords (kwset_t) _GL_ATTRIBUTE_PURE;
 extern void kwsprep (kwset_t);
-extern ptrdiff_t kwsexec (kwset_t, char const *, ptrdiff_t,
+extern ptrdiff_t kwsexec (kwset_t, char const *, idx_t,
                           struct kwsmatch *, bool)
   _GL_ARG_NONNULL ((4));
 extern void kwsfree (kwset_t);

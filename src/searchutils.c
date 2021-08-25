@@ -47,7 +47,7 @@ kwsinit (bool mb_trans)
 
   if (match_icase && (MB_CUR_MAX == 1 || mb_trans))
     {
-      trans = xmalloc (NCHAR);
+      trans = ximalloc (NCHAR);
       /* If I is a single-byte character that becomes a different
          single-byte character when uppercased, set trans[I]
          to that character.  Otherwise, set trans[I] to I.  */
@@ -88,7 +88,7 @@ kwsinit (bool mb_trans)
 
    Treat encoding errors as if they were single-byte characters.  */
 ptrdiff_t
-mb_goback (char const **mb_start, size_t *mbclen, char const *cur,
+mb_goback (char const **mb_start, idx_t *mbclen, char const *cur,
            char const *end)
 {
   const char *p = *mb_start;
@@ -114,8 +114,8 @@ mb_goback (char const **mb_start, size_t *mbclen, char const *cur,
               if (long_enough)
                 {
                   mbstate_t mbs = { 0 };
-                  size_t clen = mbrlen (cur - i, end - (cur - i), &mbs);
-                  if (clen <= MB_LEN_MAX)
+                  ptrdiff_t clen = imbrlen (cur - i, end - (cur - i), &mbs);
+                  if (0 <= clen)
                     {
                       /* This multibyte character contains *CUR.  */
                       p0 = cur - i;
@@ -130,13 +130,13 @@ mb_goback (char const **mb_start, size_t *mbclen, char const *cur,
       /* In non-UTF-8 encodings, to find character boundaries one must
          in general scan forward from the start of the buffer.  */
       mbstate_t mbs = { 0 };
-      size_t clen;
+      ptrdiff_t clen;
 
       do
         {
           clen = mb_clen (p, end - p, &mbs);
 
-          if (MB_LEN_MAX < clen)
+          if (clen < 0)
             {
               /* An invalid sequence, or a truncated multibyte character.
                  Treat it as a single byte character.  */
@@ -159,10 +159,10 @@ mb_goback (char const **mb_start, size_t *mbclen, char const *cur,
 /* Examine the start of BUF (which goes to END) for word constituents.
    If COUNTALL, examine as many as possible; otherwise, examine at most one.
    Return the total number of bytes in the examined characters.  */
-static size_t
+static idx_t
 wordchars_count (char const *buf, char const *end, bool countall)
 {
-  size_t n = 0;
+  idx_t n = 0;
   mbstate_t mbs = { 0 };
   while (n < end - buf)
     {
@@ -188,7 +188,7 @@ wordchars_count (char const *buf, char const *end, bool countall)
 /* Examine the start of BUF for the longest prefix containing just
    word constituents.  Return the total number of bytes in the prefix.
    The buffer ends at END.  */
-size_t
+idx_t
 wordchars_size (char const *buf, char const *end)
 {
   return wordchars_count (buf, end, true);
@@ -196,7 +196,7 @@ wordchars_size (char const *buf, char const *end)
 
 /* If BUF starts with a word constituent, return the number of bytes
    used to represent it; otherwise, return zero.  The buffer ends at END.  */
-size_t
+idx_t
 wordchar_next (char const *buf, char const *end)
 {
   return wordchars_count (buf, end, false);
@@ -205,7 +205,7 @@ wordchar_next (char const *buf, char const *end)
 /* In the buffer BUF, return nonzero if the character whose encoding
    contains the byte before CUR is a word constituent.  The buffer
    ends at END.  */
-size_t
+idx_t
 wordchar_prev (char const *buf, char const *cur, char const *end)
 {
   if (buf == cur)
