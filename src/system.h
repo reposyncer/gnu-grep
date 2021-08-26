@@ -101,9 +101,9 @@ void __asan_unpoison_memory_region (void const volatile *addr, size_t size);
 
 #else
 
-static _GL_UNUSED void
+_GL_UNUSED static void
 __asan_poison_memory_region (void const volatile *addr, size_t size) { }
-static _GL_UNUSED void
+_GL_UNUSED static void
 __asan_unpoison_memory_region (void const volatile *addr, size_t size) { }
 #endif
 
