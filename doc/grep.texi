@@ -1526,7 +1526,7 @@ before an interval expression's closing @samp{@}}, and an unmatched
 @code{\)} is invalid.
 
 Portable scripts should avoid the following constructs, as
-POSIX says they produce undefined results:
+POSIX says they produce unspecified results:
 
 @itemize @bullet
 @item
@@ -1540,6 +1540,8 @@ Empty alternatives (as in, e.g, @samp{a|}).
 @item
 Repetition operators that immediately follow empty expressions,
 unescaped @samp{$}, or other repetition operators.
+@item
+Interval expressions containing repetition counts greater than 255.
 @item
 A backslash escaping an ordinary character (e.g., @samp{\S}),
 unless it is a back-reference.
@@ -1964,6 +1966,17 @@ Outside the @samp{C} locale, case-insensitive search, and search for
 bracket expressions like @samp{[a-z]} and @samp{[[=a=]b]}, can be
 surprisingly inefficient due to difficulties in fast portable access to
 concepts like multi-character collating elements.
+
+@cindex interval expressions
+Interval expressions may be implemented internally via repetition.
+For example, @samp{^(a|bc)@{2,4@}$} might be implemented as
+@samp{^(a|bc)(a|bc)((a|bc)(a|bc)?)?$}.  A large repetition count may
+exhaust memory or greatly slow matching.  Even small counts can cause
+problems if cascaded; for example, @samp{grep -E
+".*@{10,@}@{10,@}@{10,@}@{10,@}@{10,@}"} is likely to overflow a
+stack.  Fortunately, regular expressions like these are typically
+artificial, and cascaded repetitions do not conform to POSIX so cannot
+be used in portable programs anyway.
 
 @cindex back-references
 A back-reference such as @samp{\1} can hurt performance significantly
