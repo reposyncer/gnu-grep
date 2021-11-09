@@ -72,8 +72,11 @@ jit_exec (struct pcre_comp *pc, char const *subject, int search_bytes,
                          search_offset, options, sub, NSUB);
 
 #if PCRE_STUDY_JIT_COMPILE
+      /* Going over this would trigger an int overflow bug within PCRE.  */
+      int jitstack_max = INT_MAX - 8 * 1024;
+
       if (e == PCRE_ERROR_JIT_STACKLIMIT
-          && 0 < pc->jit_stack_size && pc->jit_stack_size <= INT_MAX / 2)
+          && 0 < pc->jit_stack_size && pc->jit_stack_size <= jitstack_max / 2)
         {
           int old_size = pc->jit_stack_size;
           int new_size = pc->jit_stack_size = old_size * 2;
