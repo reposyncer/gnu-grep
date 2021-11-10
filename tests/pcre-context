@@ -4,29 +4,33 @@
 require_pcre_
 
 cat >in <<'EOF'
-Preceded by 0 empty lines.
-
-Preceded by 1 empty line.
-
-
-Preceded by 2 empty lines.
-
-
-
-Preceded by 3 empty lines.
-
-
-
-
-Preceded by 4 empty lines.
-
+b0
+ab1
+aab2
+aaab3
+aaaab4
 EOF
 test $? -eq 0 || framework_failure_
 
+cat >exp <<'EOF'
+b3
+ab4
+EOF
+test $? -eq 0 || framework_failure_
+
+grep -Po '(?<=aaa).*' in >out || fail_ 'grep -Po failed'
+compare exp out || fail=1
+
+printf 'NUL preceded by 0 empty lines.\0' >in &&
+printf '\nNUL preceded by 1 empty line.\0' >>in &&
+printf '\n\nNUL preceded by 2 empty lines.\0' >>in &&
+printf '\n\n\nNUL preceded by 3 empty lines.\0' >>in &&
+printf '\n\n\n\nNUL preceded by 4 empty lines.\0' >>in &&
+printf '\n' >>in || framework_failure_
+
 printf '%s\0' \
-       'Preceded by 2 empty lines.' \
-       'Preceded by 3 empty lines.' \
-       'Preceded by 4 empty lines.' >exp || framework_failure_
+       'NUL preceded by 3 empty lines.' \
+       'NUL preceded by 4 empty lines.' >exp || framework_failure_
 
 fail=0
 
