@@ -18,6 +18,8 @@ ab4
 EOF
 test $? -eq 0 || framework_failure_
 
+fail=0
+
 grep -Po '(?<=aaa).*' in >out || fail_ 'grep -Po failed'
 compare exp out || fail=1
 
@@ -28,11 +30,11 @@ printf '\n\n\nNUL preceded by 3 empty lines.\0' >>in &&
 printf '\n\n\n\nNUL preceded by 4 empty lines.\0' >>in &&
 printf '\n' >>in || framework_failure_
 
+# This output is not correct as it is missing the expected LF characters,
+# but a full fix will have to wait until PCRE2.
 printf '%s\0' \
        'NUL preceded by 3 empty lines.' \
        'NUL preceded by 4 empty lines.' >exp || framework_failure_
-
-fail=0
 
 grep -Pzo '(?<=\n\n\n).*' in >out || fail_ 'grep -Pzo failed'
 compare exp out || fail=1
