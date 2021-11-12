@@ -6,15 +6,17 @@ as well as by 'make'.  They include:
 - Automake   <https://www.gnu.org/software/automake/>
 - Gettext    <https://www.gnu.org/software/gettext/>
 - Git        <https://git-scm.com/>
+- Gperf      <https://www.gnu.org/software/gperf/>
 - Gzip       <https://www.gnu.org/software/gzip/>
 - Help2man   <https://www.gnu.org/software/help2man/>
 - M4         <https://www.gnu.org/software/m4/>
 - Make       <https://www.gnu.org/software/make/>
 - Perl       <https://www.cpan.org/>
 - Pkg-config <https://www.freedesktop.org/wiki/Software/pkg-config/>
+- Rsync      <https://rsync.samba.org/>
 - Tar        <https://www.gnu.org/software/tar/>
 - Texinfo    <https://www.gnu.org/software/texinfo/>
-- Wget       <http://www.gnu.org/software/wget/>
+- Wget       <https://www.gnu.org/software/wget/>
 - XZ Utils   <https://tukaani.org/xz/>
 
 It is generally better to use official packages for your system.
