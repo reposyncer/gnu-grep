@@ -17,41 +17,32 @@
    02110-1301, USA.  */
 
 /* Written August 1992 by Mike Haertel. */
+/* Updated for PCRE2 by Carlo Arenas. */
 
 #include <config.h>
 #include "search.h"
 #include "die.h"
 
-#include <pcre.h>
+#define PCRE2_CODE_UNIT_WIDTH 8
+#include <pcre2.h>
 
-/* This must be at least 2; everything after that is for performance
-   in pcre_exec.  */
-enum { NSUB = 300 };
-
-#ifndef PCRE_EXTRA_MATCH_LIMIT_RECURSION
-# define PCRE_EXTRA_MATCH_LIMIT_RECURSION 0
-#endif
-#ifndef PCRE_STUDY_JIT_COMPILE
-# define PCRE_STUDY_JIT_COMPILE 0
-#endif
-#ifndef PCRE_STUDY_EXTRA_NEEDED
-# define PCRE_STUDY_EXTRA_NEEDED 0
+/* Needed for backward compatibility for PCRE2 < 10.30  */
+#ifndef PCRE2_CONFIG_DEPTHLIMIT
+#define PCRE2_CONFIG_DEPTHLIMIT PCRE2_CONFIG_RECURSIONLIMIT
+#define PCRE2_ERROR_DEPTHLIMIT  PCRE2_ERROR_RECURSIONLIMIT
+#define pcre2_set_depth_limit   pcre2_set_recursion_limit
 #endif
 
 struct pcre_comp
 {
-  /* Compiled internal form of a Perl regular expression.  */
-  pcre *cre;
-
-  /* Additional information about the pattern.  */
-  pcre_extra *extra;
-
-#if PCRE_STUDY_JIT_COMPILE
   /* The JIT stack and its maximum size.  */
-  pcre_jit_stack *jit_stack;
-  int jit_stack_size;
-#endif
+  pcre2_jit_stack *jit_stack;
+  PCRE2_SIZE jit_stack_size;
 
+  /* Compiled internal form of a Perl regular expression.  */
+  pcre2_code *cre;
+  pcre2_match_context *mcontext;
+  pcre2_match_data *data;
   /* Table, indexed by ! (flag & PCRE_NOTBOL), of whether the empty
      string matches when that flag is used.  */
   int empty_match[2];
@@ -60,54 +51,49 @@ struct pcre_comp
 
 /* Match the already-compiled PCRE pattern against the data in SUBJECT,
    of size SEARCH_BYTES and starting with offset SEARCH_OFFSET, with
-   options OPTIONS, and storing resulting matches into SUB.  Return
-   the (nonnegative) match location or a (negative) error number.  */
+   options OPTIONS.
+   Return the (nonnegative) match count or a (negative) error number.  */
 static int
-jit_exec (struct pcre_comp *pc, char const *subject, int search_bytes,
-          int search_offset, int options, int *sub)
+jit_exec (struct pcre_comp *pc, char const *subject, PCRE2_SIZE search_bytes,
+          PCRE2_SIZE search_offset, int options)
 {
   while (true)
     {
-      int e = pcre_exec (pc->cre, pc->extra, subject, search_bytes,
-                         search_offset, options, sub, NSUB);
-
-#if PCRE_STUDY_JIT_COMPILE
-      /* Going over this would trigger an int overflow bug within PCRE.  */
-      int jitstack_max = INT_MAX - 8 * 1024;
-
-      if (e == PCRE_ERROR_JIT_STACKLIMIT
-          && 0 < pc->jit_stack_size && pc->jit_stack_size <= jitstack_max / 2)
+      int e = pcre2_match (pc->cre, (PCRE2_SPTR)subject, search_bytes,
+                           search_offset, options, pc->data, pc->mcontext);
+      if (e == PCRE2_ERROR_JIT_STACKLIMIT
+          && 0 < pc->jit_stack_size && pc->jit_stack_size <= INT_MAX / 2)
         {
-          int old_size = pc->jit_stack_size;
-          int new_size = pc->jit_stack_size = old_size * 2;
+          PCRE2_SIZE old_size = pc->jit_stack_size;
+          PCRE2_SIZE new_size = pc->jit_stack_size = old_size * 2;
+
           if (pc->jit_stack)
-            pcre_jit_stack_free (pc->jit_stack);
-          pc->jit_stack = pcre_jit_stack_alloc (old_size, new_size);
-          if (!pc->jit_stack)
+            pcre2_jit_stack_free (pc->jit_stack);
+          pc->jit_stack = pcre2_jit_stack_create (old_size, new_size, NULL);
+
+          if (!pc->mcontext)
+            pc->mcontext = pcre2_match_context_create (NULL);
+
+          if (!pc->jit_stack || !pc->mcontext)
             die (EXIT_TROUBLE, 0,
                  _("failed to allocate memory for the PCRE JIT stack"));
-          pcre_assign_jit_stack (pc->extra, NULL, pc->jit_stack);
+          pcre2_jit_stack_assign (pc->mcontext, NULL, pc->jit_stack);
           continue;
         }
-#endif
-
-#if PCRE_EXTRA_MATCH_LIMIT_RECURSION
-      if (e == PCRE_ERROR_RECURSIONLIMIT
-          && (PCRE_STUDY_EXTRA_NEEDED || pc->extra))
+      if (e == PCRE2_ERROR_DEPTHLIMIT)
         {
-          unsigned long lim
-            = (pc->extra->flags & PCRE_EXTRA_MATCH_LIMIT_RECURSION
-               ? pc->extra->match_limit_recursion
-               : 0);
-          if (lim <= ULONG_MAX / 2)
-            {
-              pc->extra->match_limit_recursion = lim ? 2 * lim : (1 << 24) - 1;
-              pc->extra->flags |= PCRE_EXTRA_MATCH_LIMIT_RECURSION;
-              continue;
-            }
-        }
-#endif
+          uint32_t lim;
+          pcre2_config (PCRE2_CONFIG_DEPTHLIMIT, &lim);
+          if (lim >= UINT32_MAX / 2)
+            return e;
 
+          lim <<= 1;
+          if (!pc->mcontext)
+            pc->mcontext = pcre2_match_context_create (NULL);
+
+          pcre2_set_depth_limit (pc->mcontext, lim);
+          continue;
+        }
       return e;
     }
 }
@@ -118,27 +104,35 @@ jit_exec (struct pcre_comp *pc, char const *subject, int search_bytes,
 void *
 Pcompile (char *pattern, idx_t size, reg_syntax_t ignored, bool exact)
 {
-  int e;
-  char const *ep;
+  PCRE2_SIZE e;
+  int ec;
+  PCRE2_UCHAR8 ep[128]; /* 120 code units is suggested to avoid truncation  */
   static char const wprefix[] = "(?<!\\w)(?:";
   static char const wsuffix[] = ")(?!\\w)";
   static char const xprefix[] = "^(?:";
   static char const xsuffix[] = ")$";
   int fix_len_max = MAX (sizeof wprefix - 1 + sizeof wsuffix - 1,
                          sizeof xprefix - 1 + sizeof xsuffix - 1);
-  char *re = xnmalloc (4, size + (fix_len_max + 4 - 1) / 4);
-  int flags = PCRE_DOLLAR_ENDONLY | (match_icase ? PCRE_CASELESS : 0);
+  unsigned char *re = xmalloc (size + fix_len_max + 1);
+  int flags = PCRE2_DOLLAR_ENDONLY | (match_icase ? PCRE2_CASELESS : 0);
   char *patlim = pattern + size;
-  char *n = re;
-  char const *p;
-  char const *pnul;
+  char *n = (char *)re;
   struct pcre_comp *pc = xcalloc (1, sizeof (*pc));
+  pcre2_compile_context *ccontext = pcre2_compile_context_create(NULL);
 
   if (localeinfo.multibyte)
     {
       if (! localeinfo.using_utf8)
         die (EXIT_TROUBLE, 0, _("-P supports only unibyte and UTF-8 locales"));
-      flags |= PCRE_UTF8;
+      flags |= PCRE2_UTF;
+#if 0
+      /* do not match individual code units but only UTF-8  */
+      flags |= PCRE2_NEVER_BACKSLASH_C;
+#endif
+#ifdef PCRE2_MATCH_INVALID_UTF
+      /* consider invalid UTF-8 as a barrier, instead of error  */
+      flags |= PCRE2_MATCH_INVALID_UTF;
+#endif
     }
 
   /* FIXME: Remove this restriction.  */
@@ -151,56 +145,42 @@ Pcompile (char *pattern, idx_t size, reg_syntax_t ignored, bool exact)
   if (match_lines)
     strcpy (n, xprefix);
   n += strlen (n);
-
-  /* The PCRE interface doesn't allow NUL bytes in the pattern, so
-     replace each NUL byte in the pattern with the four characters
-     "\000", removing a preceding backslash if there are an odd
-     number of backslashes before the NUL.  */
-  *patlim = '\0';
-  for (p = pattern; (pnul = p + strlen (p)) < patlim; p = pnul + 1)
+  memcpy (n, pattern, size);
+  n += size;
+  if (match_words && !match_lines)
     {
-      memcpy (n, p, pnul - p);
-      n += pnul - p;
-      for (p = pnul; pattern < p && p[-1] == '\\'; p--)
-        continue;
-      n -= (pnul - p) & 1;
-      strcpy (n, "\\000");
-      n += 4;
-    }
-  memcpy (n, p, patlim - p + 1);
-  n += patlim - p;
-  *patlim = '\n';
-
-  if (match_words)
     strcpy (n, wsuffix);
+    n += strlen(wsuffix);
+    }
   if (match_lines)
+    {
     strcpy (n, xsuffix);
+    n += strlen(xsuffix);
+    }
 
-  pc->cre = pcre_compile (re, flags, &ep, &e, pcre_maketables ());
+  pcre2_set_character_tables (ccontext, pcre2_maketables (NULL));
+  pc->cre = pcre2_compile (re, n - (char *)re, flags, &ec, &e, ccontext);
   if (!pc->cre)
-    die (EXIT_TROUBLE, 0, "%s", ep);
+    {
+      pcre2_get_error_message (ec, ep, sizeof (ep));
+      die (EXIT_TROUBLE, 0, "%s", ep);
+    }
 
-  int pcre_study_flags = PCRE_STUDY_EXTRA_NEEDED | PCRE_STUDY_JIT_COMPILE;
-  pc->extra = pcre_study (pc->cre, pcre_study_flags, &ep);
-  if (ep)
-    die (EXIT_TROUBLE, 0, "%s", ep);
+  pc->data = pcre2_match_data_create_from_pattern (pc->cre, NULL);
 
-#if PCRE_STUDY_JIT_COMPILE
-  if (pcre_fullinfo (pc->cre, pc->extra, PCRE_INFO_JIT, &e))
-    die (EXIT_TROUBLE, 0, _("internal error (should never happen)"));
-
-  /* The PCRE documentation says that a 32 KiB stack is the default.  */
-  if (e)
-    pc->jit_stack_size = 32 << 10;
-#endif
+  ec = pcre2_jit_compile (pc->cre, PCRE2_JIT_COMPLETE);
+  if (ec && ec != PCRE2_ERROR_JIT_BADOPTION && ec != PCRE2_ERROR_NOMEMORY)
+    die (EXIT_TROUBLE, 0, _("JIT internal error: %d"), ec);
+  else
+    {
+      /* The PCRE documentation says that a 32 KiB stack is the default.  */
+      pc->jit_stack_size = 32 << 10;
+    }
 
   free (re);
 
-  int sub[NSUB];
-  pc->empty_match[false] = pcre_exec (pc->cre, pc->extra, "", 0, 0,
-                                      PCRE_NOTBOL, sub, NSUB);
-  pc->empty_match[true] = pcre_exec (pc->cre, pc->extra, "", 0, 0, 0, sub,
-                                     NSUB);
+  pc->empty_match[false] = jit_exec (pc, "", 0, 0, PCRE2_NOTBOL);
+  pc->empty_match[true] = jit_exec (pc, "", 0, 0, 0);
 
   return pc;
 }
@@ -209,15 +189,15 @@ ptrdiff_t
 Pexecute (void *vcp, char const *buf, idx_t size, idx_t *match_size,
           char const *start_ptr)
 {
-  int sub[NSUB];
   char const *p = start_ptr ? start_ptr : buf;
   bool bol = p[-1] == eolbyte;
   char const *line_start = buf;
-  int e = PCRE_ERROR_NOMATCH;
+  int e = PCRE2_ERROR_NOMATCH;
   char const *line_end;
   struct pcre_comp *pc = vcp;
+  PCRE2_SIZE *sub = pcre2_get_ovector_pointer (pc->data);
 
-  /* The search address to pass to pcre_exec.  This is the start of
+  /* The search address to pass to PCRE.  This is the start of
      the buffer, or just past the most-recently discovered encoding
      error or line end.  */
   char const *subject = buf;
@@ -229,14 +209,14 @@ Pexecute (void *vcp, char const *buf, idx_t size, idx_t *match_size,
          better and the correctness issues were too puzzling.  See
          Bug#22655.  */
       line_end = rawmemchr (p, eolbyte);
-      if (INT_MAX < line_end - p)
+      if (PCRE2_SIZE_MAX < line_end - p)
         die (EXIT_TROUBLE, 0, _("exceeded PCRE's line length limit"));
 
       for (;;)
         {
           /* Skip past bytes that are easily determined to be encoding
              errors, treating them as data that cannot match.  This is
-             faster than having pcre_exec check them.  */
+             faster than having PCRE check them.  */
           while (localeinfo.sbclen[to_uchar (*p)] == -1)
             {
               p++;
@@ -244,10 +224,10 @@ Pexecute (void *vcp, char const *buf, idx_t size, idx_t *match_size,
               bol = false;
             }
 
-          int search_offset = p - subject;
+          PCRE2_SIZE search_offset = p - subject;
 
           /* Check for an empty match; this is faster than letting
-             pcre_exec do it.  */
+             PCRE do it.  */
           if (p == line_end)
             {
               sub[0] = sub[1] = search_offset;
@@ -257,13 +237,14 @@ Pexecute (void *vcp, char const *buf, idx_t size, idx_t *match_size,
 
           int options = 0;
           if (!bol)
-            options |= PCRE_NOTBOL;
+            options |= PCRE2_NOTBOL;
 
-          e = jit_exec (pc, subject, line_end - subject, search_offset,
-                        options, sub);
-          if (e != PCRE_ERROR_BADUTF8)
+          e = jit_exec (pc, subject, line_end - subject,
+                        search_offset, options);
+          /* PCRE2 provides 22 different error codes for bad UTF-8  */
+          if (! (PCRE2_ERROR_UTF8_ERR21 <= e && e < PCRE2_ERROR_UTF8_ERR1))
             break;
-          int valid_bytes = sub[0];
+          PCRE2_SIZE valid_bytes = pcre2_get_startchar (pc->data);
 
           if (search_offset <= valid_bytes)
             {
@@ -273,14 +254,15 @@ Pexecute (void *vcp, char const *buf, idx_t size, idx_t *match_size,
                   /* Handle the empty-match case specially, for speed.
                      This optimization is valid if VALID_BYTES is zero,
                      which means SEARCH_OFFSET is also zero.  */
+                  sub[0] = valid_bytes;
                   sub[1] = 0;
                   e = pc->empty_match[bol];
                 }
               else
                 e = jit_exec (pc, subject, valid_bytes, search_offset,
-                              options | PCRE_NO_UTF8_CHECK | PCRE_NOTEOL, sub);
+                              options | PCRE2_NO_UTF_CHECK | PCRE2_NOTEOL);
 
-              if (e != PCRE_ERROR_NOMATCH)
+              if (e != PCRE2_ERROR_NOMATCH)
                 break;
 
               /* Treat the encoding error as data that cannot match.  */
@@ -291,7 +273,7 @@ Pexecute (void *vcp, char const *buf, idx_t size, idx_t *match_size,
           subject += valid_bytes + 1;
         }
 
-      if (e != PCRE_ERROR_NOMATCH)
+      if (e != PCRE2_ERROR_NOMATCH)
         break;
       bol = true;
       p = subject = line_start = line_end + 1;
@@ -302,25 +284,34 @@ Pexecute (void *vcp, char const *buf, idx_t size, idx_t *match_size,
     {
       switch (e)
         {
-        case PCRE_ERROR_NOMATCH:
+        case PCRE2_ERROR_NOMATCH:
           break;
 
-        case PCRE_ERROR_NOMEMORY:
+        case PCRE2_ERROR_NOMEMORY:
           die (EXIT_TROUBLE, 0, _("%s: memory exhausted"), input_filename ());
 
-#if PCRE_STUDY_JIT_COMPILE
-        case PCRE_ERROR_JIT_STACKLIMIT:
+        case PCRE2_ERROR_JIT_STACKLIMIT:
           die (EXIT_TROUBLE, 0, _("%s: exhausted PCRE JIT stack"),
                input_filename ());
-#endif
 
-        case PCRE_ERROR_MATCHLIMIT:
+        case PCRE2_ERROR_MATCHLIMIT:
           die (EXIT_TROUBLE, 0, _("%s: exceeded PCRE's backtracking limit"),
                input_filename ());
 
-        case PCRE_ERROR_RECURSIONLIMIT:
-          die (EXIT_TROUBLE, 0, _("%s: exceeded PCRE's recursion limit"),
+        case PCRE2_ERROR_DEPTHLIMIT:
+          die (EXIT_TROUBLE, 0,
+               _("%s: exceeded PCRE's nested backtracking limit"),
                input_filename ());
+
+        case PCRE2_ERROR_RECURSELOOP:
+          die (EXIT_TROUBLE, 0, _("%s: PCRE detected recurse loop"),
+               input_filename ());
+
+#ifdef PCRE2_ERROR_HEAPLIMIT
+        case PCRE2_ERROR_HEAPLIMIT:
+          die (EXIT_TROUBLE, 0, _("%s: exceeded PCRE's heap limit"),
+               input_filename ());
+#endif
 
         default:
           /* For now, we lump all remaining PCRE failures into this basket.

@@ -1168,7 +1168,7 @@ In other implementations, basic regular expressions are less powerful.
 The following description applies to extended regular expressions;
 differences for basic regular expressions are summarized afterwards.
 Perl-compatible regular expressions give additional functionality, and
-are documented in the @i{pcresyntax}(3) and @i{pcrepattern}(3) manual
+are documented in the @i{pcre2syntax}(3) and @i{pcre2pattern}(3) manual
 pages, but work only if PCRE is available in the system.
 
 @menu

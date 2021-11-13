@@ -101,13 +101,13 @@ my @Tests =
    ],
    ['invalid-re-P-paren', '-P ")"', {EXIT=>2},
     {ERR => $ENV{PCRE_WORKS} == 1
-       ? "$prog: unmatched parentheses\n"
+       ? "$prog: unmatched closing parenthesis\n"
        : $no_pcre
     },
    ],
    ['invalid-re-P-star-paren', '-P "a.*)"', {EXIT=>2},
     {ERR => $ENV{PCRE_WORKS} == 1
-       ? "$prog: unmatched parentheses\n"
+       ? "$prog: unmatched closing parenthesis\n"
        : $no_pcre
     },
    ],
