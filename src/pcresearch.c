@@ -104,6 +104,18 @@ jit_exec (struct pcre_comp *pc, char const *subject, PCRE2_SIZE search_bytes,
     }
 }
 
+/* Return true if E is an error code for bad UTF-8, and if pcre2_match
+   could return E because PCRE lacks PCRE2_MATCH_INVALID_UTF.  */
+static bool
+bad_utf8_from_pcre2 (int e)
+{
+#ifdef PCRE2_MATCH_INVALID_UTF
+  return false;
+#else
+  return PCRE2_ERROR_UTF8_ERR21 <= e && e <= PCRE2_ERROR_UTF8_ERR1;
+#endif
+}
+
 /* Compile the -P style PATTERN, containing SIZE bytes that are
    followed by '\n'.  Return a description of the compiled pattern.  */
 
@@ -248,9 +260,9 @@ Pexecute (void *vcp, char const *buf, idx_t size, idx_t *match_size,
 
           e = jit_exec (pc, subject, line_end - subject,
                         search_offset, options);
-          /* PCRE2 provides 22 different error codes for bad UTF-8  */
-          if (! (PCRE2_ERROR_UTF8_ERR21 <= e && e < PCRE2_ERROR_UTF8_ERR1))
+          if (!bad_utf8_from_pcre2 (e))
             break;
+
           PCRE2_SIZE valid_bytes = pcre2_get_startchar (pc->data);
 
           if (search_offset <= valid_bytes)
