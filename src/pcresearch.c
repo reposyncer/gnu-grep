@@ -112,7 +112,6 @@ Pcompile (char *pattern, idx_t size, reg_syntax_t ignored, bool exact)
 {
   PCRE2_SIZE e;
   int ec;
-  PCRE2_UCHAR8 ep[128]; /* 120 code units is suggested to avoid truncation  */
   static char const wprefix[] = "(?<!\\w)(?:";
   static char const wsuffix[] = ")(?!\\w)";
   static char const xprefix[] = "^(?:";
@@ -168,7 +167,9 @@ Pcompile (char *pattern, idx_t size, reg_syntax_t ignored, bool exact)
   pc->cre = pcre2_compile (re, n - (char *)re, flags, &ec, &e, ccontext);
   if (!pc->cre)
     {
-      pcre2_get_error_message (ec, ep, sizeof (ep));
+      enum { ERRBUFSIZ = 256 }; /* Taken from pcre2grep.c ERRBUFSIZ.  */
+      PCRE2_UCHAR8 ep[ERRBUFSIZ];
+      pcre2_get_error_message (ec, ep, sizeof ep);
       die (EXIT_TROUBLE, 0, "%s", ep);
     }
 
