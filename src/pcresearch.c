@@ -59,10 +59,16 @@ jit_exec (struct pcre_comp *pc, char const *subject, PCRE2_SIZE search_bytes,
 {
   while (true)
     {
+      /* STACK_GROWTH_RATE is taken from PCRE's src/pcre2_jit_compile.c.
+         Going over the jitstack_max limit could trigger an int
+         overflow bug within PCRE.  */
+      int STACK_GROWTH_RATE = 8192;
+      size_t jitstack_max = SIZE_MAX - (STACK_GROWTH_RATE - 1);
+
       int e = pcre2_match (pc->cre, (PCRE2_SPTR) subject, search_bytes,
                            search_offset, options, pc->data, pc->mcontext);
       if (e == PCRE2_ERROR_JIT_STACKLIMIT
-          && 0 < pc->jit_stack_size && pc->jit_stack_size <= INT_MAX / 2)
+          && 0 < pc->jit_stack_size && pc->jit_stack_size <= jitstack_max / 2)
         {
           PCRE2_SIZE old_size = pc->jit_stack_size;
           PCRE2_SIZE new_size = pc->jit_stack_size = old_size * 2;
