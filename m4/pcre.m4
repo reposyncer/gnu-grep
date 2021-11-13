@@ -9,7 +9,7 @@ AC_DEFUN([gl_FUNC_PCRE],
 [
   AC_ARG_ENABLE([perl-regexp],
     AS_HELP_STRING([--disable-perl-regexp],
-                   [disable perl-regexp (pcre2) support]),
+                   [disable perl-regexp (PCRE) support]),
     [case $enableval in
        yes|no) test_pcre=$enableval;;
        *) AC_MSG_ERROR([invalid value $enableval for --disable-perl-regexp]);;
@@ -42,16 +42,16 @@ AC_DEFUN([gl_FUNC_PCRE],
     if test "$pcre_cv_have_pcre2_compile" = yes; then
       use_pcre=yes
     elif test $test_pcre = maybe; then
-      AC_MSG_WARN([AC_PACKAGE_NAME will be built without pcre support.])
+      AC_MSG_WARN([AC_PACKAGE_NAME will be built without PCRE support.])
     else
-      AC_MSG_ERROR([pcre support not available])
+      AC_MSG_ERROR([PCRE support not available])
     fi
   fi
 
   if test $use_pcre = yes; then
     AC_DEFINE([HAVE_LIBPCRE], [1],
       [Define to 1 if you have the Perl Compatible Regular Expressions
-       library (-lpcre2).])
+       library.])
   else
     PCRE_CFLAGS=
     PCRE_LIBS=

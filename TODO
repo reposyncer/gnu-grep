@@ -31,13 +31,13 @@ GNU grep originally did 32-bit arithmetic.  Although it has moved to
 64-bit on 64-bit platforms by using types like ptrdiff_t and size_t,
 this conversion has not been entirely systematic and should be checked.
 
-Lazy dynamic linking of libpcre.  See Debian’s 03-397262-dlopen-pcre.patch.
+Lazy dynamic linking of the PCRE library.
 
 Check FreeBSD’s integration of zgrep (-Z) and bzgrep (-J) in one
 binary.  Is there a possibility of doing even better by automatically
 checking the magic of binary files ourselves (0x1F 0x8B for gzip, 0x1F
 0x9D for compress, and 0x42 0x5A 0x68 for bzip2)?  Once what to do with
-libpcre is decided, do the same for libz and libbz2.
+the PCRE library is decided, do the same for libz and libbz2.
 
 
 ===================

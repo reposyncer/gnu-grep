@@ -1,5 +1,5 @@
 #! /bin/sh
-# Show that grep handles PCRE's PCRE_ERROR_MATCHLIMIT.
+# Show that grep handles PCRE2_ERROR_MATCHLIMIT.
 # In grep-2.8, it would abort.
 #
 # Copyright (C) 2011-2021 Free Software Foundation, Inc.

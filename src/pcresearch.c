@@ -16,9 +16,6 @@
    Foundation, Inc., 51 Franklin Street - Fifth Floor, Boston, MA
    02110-1301, USA.  */
 
-/* Written August 1992 by Mike Haertel. */
-/* Updated for PCRE2 by Carlo Arenas. */
-
 #include <config.h>
 #include "search.h"
 #include "die.h"
@@ -26,24 +23,27 @@
 #define PCRE2_CODE_UNIT_WIDTH 8
 #include <pcre2.h>
 
-/* Needed for backward compatibility for PCRE2 < 10.30  */
+/* For PCRE2 < 10.30.  */
 #ifndef PCRE2_CONFIG_DEPTHLIMIT
-#define PCRE2_CONFIG_DEPTHLIMIT PCRE2_CONFIG_RECURSIONLIMIT
-#define PCRE2_ERROR_DEPTHLIMIT  PCRE2_ERROR_RECURSIONLIMIT
-#define pcre2_set_depth_limit   pcre2_set_recursion_limit
+# define PCRE2_CONFIG_DEPTHLIMIT PCRE2_CONFIG_RECURSIONLIMIT
+# define PCRE2_ERROR_DEPTHLIMIT PCRE2_ERROR_RECURSIONLIMIT
+# define pcre2_set_depth_limit pcre2_set_recursion_limit
 #endif
 
 struct pcre_comp
 {
+  /* Compiled internal form of a Perl regular expression.  */
+  pcre2_code *cre;
+
+  /* Match context and data block.  */
+  pcre2_match_context *mcontext;
+  pcre2_match_data *data;
+
   /* The JIT stack and its maximum size.  */
   pcre2_jit_stack *jit_stack;
   PCRE2_SIZE jit_stack_size;
 
-  /* Compiled internal form of a Perl regular expression.  */
-  pcre2_code *cre;
-  pcre2_match_context *mcontext;
-  pcre2_match_data *data;
-  /* Table, indexed by ! (flag & PCRE_NOTBOL), of whether the empty
+  /* Table, indexed by ! (flag & PCRE2_NOTBOL), of whether the empty
      string matches when that flag is used.  */
   int empty_match[2];
 };
@@ -59,7 +59,7 @@ jit_exec (struct pcre_comp *pc, char const *subject, PCRE2_SIZE search_bytes,
 {
   while (true)
     {
-      int e = pcre2_match (pc->cre, (PCRE2_SPTR)subject, search_bytes,
+      int e = pcre2_match (pc->cre, (PCRE2_SPTR) subject, search_bytes,
                            search_offset, options, pc->data, pc->mcontext);
       if (e == PCRE2_ERROR_JIT_STACKLIMIT
           && 0 < pc->jit_stack_size && pc->jit_stack_size <= INT_MAX / 2)
@@ -118,7 +118,7 @@ Pcompile (char *pattern, idx_t size, reg_syntax_t ignored, bool exact)
   char *patlim = pattern + size;
   char *n = (char *)re;
   struct pcre_comp *pc = xcalloc (1, sizeof (*pc));
-  pcre2_compile_context *ccontext = pcre2_compile_context_create(NULL);
+  pcre2_compile_context *ccontext = pcre2_compile_context_create (NULL);
 
   if (localeinfo.multibyte)
     {
@@ -126,11 +126,11 @@ Pcompile (char *pattern, idx_t size, reg_syntax_t ignored, bool exact)
         die (EXIT_TROUBLE, 0, _("-P supports only unibyte and UTF-8 locales"));
       flags |= PCRE2_UTF;
 #if 0
-      /* do not match individual code units but only UTF-8  */
+      /* Do not match individual code units but only UTF-8.  */
       flags |= PCRE2_NEVER_BACKSLASH_C;
 #endif
 #ifdef PCRE2_MATCH_INVALID_UTF
-      /* consider invalid UTF-8 as a barrier, instead of error  */
+      /* Consider invalid UTF-8 as a barrier, instead of error.  */
       flags |= PCRE2_MATCH_INVALID_UTF;
 #endif
     }
@@ -149,13 +149,13 @@ Pcompile (char *pattern, idx_t size, reg_syntax_t ignored, bool exact)
   n += size;
   if (match_words && !match_lines)
     {
-    strcpy (n, wsuffix);
-    n += strlen(wsuffix);
+      strcpy (n, wsuffix);
+      n += strlen (wsuffix);
     }
   if (match_lines)
     {
-    strcpy (n, xsuffix);
-    n += strlen(xsuffix);
+      strcpy (n, xsuffix);
+      n += strlen (xsuffix);
     }
 
   pcre2_set_character_tables (ccontext, pcre2_maketables (NULL));
@@ -204,8 +204,8 @@ Pexecute (void *vcp, char const *buf, idx_t size, idx_t *match_size,
 
   do
     {
-      /* Search line by line.  Although this code formerly used
-         PCRE_MULTILINE for performance, the performance wasn't always
+      /* Search line by line.  Although this formerly used something like
+         PCRE2_MULTILINE for performance, the performance wasn't always
          better and the correctness issues were too puzzling.  See
          Bug#22655.  */
       line_end = rawmemchr (p, eolbyte);

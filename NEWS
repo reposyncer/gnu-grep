@@ -4,9 +4,13 @@ GNU grep NEWS                                    -*- outline -*-
 
 ** Changes in behavior
 
+  The -P option is now based on PCRE2 instead of the older PCRE,
+  thanks to code contributed by Carlo Arenas.
+
   The egrep and fgrep commands, which have been deprecated since
   release 2.5.3 (2007), now warn that they are obsolescent and should
   be replaced by grep -E and grep -F.
+
 
 * Noteworthy changes in release 3.7 (2021-08-14) [stable]
 
