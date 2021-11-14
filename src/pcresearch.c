@@ -196,11 +196,9 @@ Pcompile (char *pattern, idx_t size, reg_syntax_t ignored, bool exact)
   ec = pcre2_jit_compile (pc->cre, PCRE2_JIT_COMPLETE);
   if (ec && ec != PCRE2_ERROR_JIT_BADOPTION && ec != PCRE2_ERROR_NOMEMORY)
     die (EXIT_TROUBLE, 0, _("JIT internal error: %d"), ec);
-  else
-    {
-      /* The PCRE documentation says that a 32 KiB stack is the default.  */
-      pc->jit_stack_size = 32 << 10;
-    }
+
+  /* The PCRE documentation says that a 32 KiB stack is the default.  */
+  pc->jit_stack_size = 32 << 10;
 
   pc->empty_match[false] = jit_exec (pc, "", 0, 0, PCRE2_NOTBOL);
   pc->empty_match[true] = jit_exec (pc, "", 0, 0, 0);
