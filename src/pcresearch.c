@@ -202,6 +202,7 @@ Pcompile (char *pattern, idx_t size, reg_syntax_t ignored, bool exact)
     }
 
   free (re_storage);
+  pcre2_compile_context_free (ccontext);
 
   pc->mcontext = NULL;
   pc->data = pcre2_match_data_create_from_pattern (pc->cre, gcontext);
