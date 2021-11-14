@@ -122,16 +122,8 @@ Pcompile (char *pattern, idx_t size, reg_syntax_t ignored, bool exact)
 {
   PCRE2_SIZE e;
   int ec;
-  static char const wprefix[] = "(?<!\\w)(?:";
-  static char const wsuffix[] = ")(?!\\w)";
-  static char const xprefix[] = "^(?:";
-  static char const xsuffix[] = ")$";
-  int fix_len_max = MAX (sizeof wprefix - 1 + sizeof wsuffix - 1,
-                         sizeof xprefix - 1 + sizeof xsuffix - 1);
-  unsigned char *re = xmalloc (size + fix_len_max + 1);
   int flags = PCRE2_DOLLAR_ENDONLY | (match_icase ? PCRE2_CASELESS : 0);
   char *patlim = pattern + size;
-  char *n = (char *)re;
   struct pcre_comp *pc = xcalloc (1, sizeof (*pc));
   pcre2_compile_context *ccontext = pcre2_compile_context_create (NULL);
 
@@ -154,27 +146,41 @@ Pcompile (char *pattern, idx_t size, reg_syntax_t ignored, bool exact)
   if (rawmemchr (pattern, '\n') != patlim)
     die (EXIT_TROUBLE, 0, _("the -P option only supports a single pattern"));
 
-  *n = '\0';
-  if (match_words)
-    strcpy (n, wprefix);
+  void *re_storage = NULL;
   if (match_lines)
-    strcpy (n, xprefix);
-  n += strlen (n);
-  memcpy (n, pattern, size);
-  n += size;
-  if (match_words && !match_lines)
     {
-      strcpy (n, wsuffix);
-      n += strlen (wsuffix);
+#ifdef PCRE2_EXTRA_MATCH_LINE
+      pcre2_set_compile_extra_options (ccontext, PCRE2_EXTRA_MATCH_LINE);
+#else
+      static char const /* These sizes omit trailing NUL.  */
+        xprefix[4] = "^(?:", xsuffix[2] = ")$";
+      idx_t re_size = size + sizeof xprefix + sizeof xsuffix;
+      char *re = re_storage = ximalloc (re_size);
+      char *rez = mempcpy (re, xprefix, sizeof xprefix);
+      rez = mempcpy (rez, pattern, size);
+      memcpy (rez, xsuffix, sizeof xsuffix);
+      pattern = re;
+      size = re_size;
+#endif
     }
-  if (match_lines)
+  else if (match_words)
     {
-      strcpy (n, xsuffix);
-      n += strlen (xsuffix);
+      /* PCRE2_EXTRA_MATCH_WORD is incompatible with grep -w;
+         do things the grep way.  */
+      static char const /* These sizes omit trailing NUL.  */
+        wprefix[10] = "(?<!\\w)(?:", wsuffix[7] = ")(?!\\w)";
+      idx_t re_size = size + sizeof wprefix + sizeof wsuffix;
+      char *re = re_storage = ximalloc (re_size);
+      char *rez = mempcpy (re, wprefix, sizeof wprefix);
+      rez = mempcpy (rez, pattern, size);
+      memcpy (rez, wsuffix, sizeof wsuffix);
+      pattern = re;
+      size = re_size;
     }
 
   pcre2_set_character_tables (ccontext, pcre2_maketables (NULL));
-  pc->cre = pcre2_compile (re, n - (char *)re, flags, &ec, &e, ccontext);
+  pc->cre = pcre2_compile ((PCRE2_SPTR) pattern, size, flags,
+                           &ec, &e, ccontext);
   if (!pc->cre)
     {
       enum { ERRBUFSIZ = 256 }; /* Taken from pcre2grep.c ERRBUFSIZ.  */
@@ -182,6 +188,8 @@ Pcompile (char *pattern, idx_t size, reg_syntax_t ignored, bool exact)
       pcre2_get_error_message (ec, ep, sizeof ep);
       die (EXIT_TROUBLE, 0, "%s", ep);
     }
+
+  free (re_storage);
 
   pc->data = pcre2_match_data_create_from_pattern (pc->cre, NULL);
 
@@ -193,8 +201,6 @@ Pcompile (char *pattern, idx_t size, reg_syntax_t ignored, bool exact)
       /* The PCRE documentation says that a 32 KiB stack is the default.  */
       pc->jit_stack_size = 32 << 10;
     }
-
-  free (re);
 
   pc->empty_match[false] = jit_exec (pc, "", 0, 0, PCRE2_NOTBOL);
   pc->empty_match[true] = jit_exec (pc, "", 0, 0, 0);
