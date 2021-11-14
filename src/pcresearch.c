@@ -41,7 +41,7 @@ struct pcre_comp
 
   /* The JIT stack and its maximum size.  */
   pcre2_jit_stack *jit_stack;
-  PCRE2_SIZE jit_stack_size;
+  idx_t jit_stack_size;
 
   /* Table, indexed by ! (flag & PCRE2_NOTBOL), of whether the empty
      string matches when that flag is used.  */
@@ -54,24 +54,24 @@ struct pcre_comp
    options OPTIONS.
    Return the (nonnegative) match count or a (negative) error number.  */
 static int
-jit_exec (struct pcre_comp *pc, char const *subject, PCRE2_SIZE search_bytes,
-          PCRE2_SIZE search_offset, int options)
+jit_exec (struct pcre_comp *pc, char const *subject, idx_t search_bytes,
+          idx_t search_offset, int options)
 {
   while (true)
     {
       /* STACK_GROWTH_RATE is taken from PCRE's src/pcre2_jit_compile.c.
          Going over the jitstack_max limit could trigger an int
-         overflow bug within PCRE.  */
+         overflow bug.  */
       int STACK_GROWTH_RATE = 8192;
-      size_t jitstack_max = SIZE_MAX - (STACK_GROWTH_RATE - 1);
+      idx_t jitstack_max = MIN (IDX_MAX, SIZE_MAX - (STACK_GROWTH_RATE - 1));
 
       int e = pcre2_match (pc->cre, (PCRE2_SPTR) subject, search_bytes,
                            search_offset, options, pc->data, pc->mcontext);
       if (e == PCRE2_ERROR_JIT_STACKLIMIT
-          && 0 < pc->jit_stack_size && pc->jit_stack_size <= jitstack_max / 2)
+          && pc->jit_stack_size <= jitstack_max / 2)
         {
-          PCRE2_SIZE old_size = pc->jit_stack_size;
-          PCRE2_SIZE new_size = pc->jit_stack_size = old_size * 2;
+          idx_t old_size = pc->jit_stack_size;
+          idx_t new_size = pc->jit_stack_size = old_size * 2;
 
           if (pc->jit_stack)
             pcre2_jit_stack_free (pc->jit_stack);
@@ -90,10 +90,8 @@ jit_exec (struct pcre_comp *pc, char const *subject, PCRE2_SIZE search_bytes,
         {
           uint32_t lim;
           pcre2_config (PCRE2_CONFIG_DEPTHLIMIT, &lim);
-          if (lim >= UINT32_MAX / 2)
+          if (INT_MULTIPLY_WRAPV (lim, 2, &lim))
             return e;
-
-          lim <<= 1;
           if (!pc->mcontext)
             pc->mcontext = pcre2_match_context_create (NULL);
 
@@ -243,7 +241,7 @@ Pexecute (void *vcp, char const *buf, idx_t size, idx_t *match_size,
               bol = false;
             }
 
-          PCRE2_SIZE search_offset = p - subject;
+          idx_t search_offset = p - subject;
 
           /* Check for an empty match; this is faster than letting
              PCRE do it.  */
@@ -263,7 +261,7 @@ Pexecute (void *vcp, char const *buf, idx_t size, idx_t *match_size,
           if (!bad_utf8_from_pcre2 (e))
             break;
 
-          PCRE2_SIZE valid_bytes = pcre2_get_startchar (pc->data);
+          idx_t valid_bytes = pcre2_get_startchar (pc->data);
 
           if (search_offset <= valid_bytes)
             {
