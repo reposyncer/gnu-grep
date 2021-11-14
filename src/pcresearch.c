@@ -134,7 +134,7 @@ Pcompile (char *pattern, idx_t size, reg_syntax_t ignored, bool exact)
   int ec;
   int flags = PCRE2_DOLLAR_ENDONLY | (match_icase ? PCRE2_CASELESS : 0);
   char *patlim = pattern + size;
-  struct pcre_comp *pc = xcalloc (1, sizeof (*pc));
+  struct pcre_comp *pc = ximalloc (sizeof *pc);
   pcre2_general_context *gcontext = pc->gcontext
     = pcre2_general_context_create (private_malloc, private_free, NULL);
   pcre2_compile_context *ccontext = pcre2_compile_context_create (gcontext);
@@ -203,6 +203,7 @@ Pcompile (char *pattern, idx_t size, reg_syntax_t ignored, bool exact)
 
   free (re_storage);
 
+  pc->mcontext = NULL;
   pc->data = pcre2_match_data_create_from_pattern (pc->cre, gcontext);
 
   ec = pcre2_jit_compile (pc->cre, PCRE2_JIT_COMPLETE);
@@ -210,6 +211,7 @@ Pcompile (char *pattern, idx_t size, reg_syntax_t ignored, bool exact)
     die (EXIT_TROUBLE, 0, _("JIT internal error: %d"), ec);
 
   /* The PCRE documentation says that a 32 KiB stack is the default.  */
+  pc->jit_stack = NULL;
   pc->jit_stack_size = 32 << 10;
 
   pc->empty_match[false] = jit_exec (pc, "", 0, 0, PCRE2_NOTBOL);
