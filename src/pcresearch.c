@@ -32,6 +32,9 @@
 
 struct pcre_comp
 {
+  /* General context for PCRE operations.  */
+  pcre2_general_context *gcontext;
+
   /* Compiled internal form of a Perl regular expression.  */
   pcre2_code *cre;
 
@@ -48,6 +51,19 @@ struct pcre_comp
   int empty_match[2];
 };
 
+/* Memory allocation functions for PCRE.  */
+static void *
+private_malloc (PCRE2_SIZE size, _GL_UNUSED void *unused)
+{
+  if (IDX_MAX < size)
+    xalloc_die ();
+  return ximalloc (size);
+}
+static void
+private_free (void *ptr, _GL_UNUSED void *unused)
+{
+  free (ptr);
+}
 
 /* Match the already-compiled PCRE pattern against the data in SUBJECT,
    of size SEARCH_BYTES and starting with offset SEARCH_OFFSET, with
@@ -72,33 +88,27 @@ jit_exec (struct pcre_comp *pc, char const *subject, idx_t search_bytes,
         {
           idx_t old_size = pc->jit_stack_size;
           idx_t new_size = pc->jit_stack_size = old_size * 2;
-
-          if (pc->jit_stack)
-            pcre2_jit_stack_free (pc->jit_stack);
-          pc->jit_stack = pcre2_jit_stack_create (old_size, new_size, NULL);
-
+          pcre2_jit_stack_free (pc->jit_stack);
+          pc->jit_stack = pcre2_jit_stack_create (old_size, new_size,
+                                                  pc->gcontext);
+          if (!pc->jit_stack)
+            xalloc_die ();
           if (!pc->mcontext)
-            pc->mcontext = pcre2_match_context_create (NULL);
-
-          if (!pc->jit_stack || !pc->mcontext)
-            die (EXIT_TROUBLE, 0,
-                 _("failed to allocate memory for the PCRE JIT stack"));
+            pc->mcontext = pcre2_match_context_create (pc->gcontext);
           pcre2_jit_stack_assign (pc->mcontext, NULL, pc->jit_stack);
-          continue;
         }
-      if (e == PCRE2_ERROR_DEPTHLIMIT)
+      else if (e == PCRE2_ERROR_DEPTHLIMIT)
         {
           uint32_t lim;
           pcre2_config (PCRE2_CONFIG_DEPTHLIMIT, &lim);
           if (INT_MULTIPLY_WRAPV (lim, 2, &lim))
             return e;
           if (!pc->mcontext)
-            pc->mcontext = pcre2_match_context_create (NULL);
-
+            pc->mcontext = pcre2_match_context_create (pc->gcontext);
           pcre2_set_depth_limit (pc->mcontext, lim);
-          continue;
         }
-      return e;
+      else
+        return e;
     }
 }
 
@@ -125,7 +135,9 @@ Pcompile (char *pattern, idx_t size, reg_syntax_t ignored, bool exact)
   int flags = PCRE2_DOLLAR_ENDONLY | (match_icase ? PCRE2_CASELESS : 0);
   char *patlim = pattern + size;
   struct pcre_comp *pc = xcalloc (1, sizeof (*pc));
-  pcre2_compile_context *ccontext = pcre2_compile_context_create (NULL);
+  pcre2_general_context *gcontext = pc->gcontext
+    = pcre2_general_context_create (private_malloc, private_free, NULL);
+  pcre2_compile_context *ccontext = pcre2_compile_context_create (gcontext);
 
   if (localeinfo.multibyte)
     {
@@ -178,7 +190,7 @@ Pcompile (char *pattern, idx_t size, reg_syntax_t ignored, bool exact)
       size = re_size;
     }
 
-  pcre2_set_character_tables (ccontext, pcre2_maketables (NULL));
+  pcre2_set_character_tables (ccontext, pcre2_maketables (gcontext));
   pc->cre = pcre2_compile ((PCRE2_SPTR) pattern, size, flags,
                            &ec, &e, ccontext);
   if (!pc->cre)
@@ -191,7 +203,7 @@ Pcompile (char *pattern, idx_t size, reg_syntax_t ignored, bool exact)
 
   free (re_storage);
 
-  pc->data = pcre2_match_data_create_from_pattern (pc->cre, NULL);
+  pc->data = pcre2_match_data_create_from_pattern (pc->cre, gcontext);
 
   ec = pcre2_jit_compile (pc->cre, PCRE2_JIT_COMPLETE);
   if (ec && ec != PCRE2_ERROR_JIT_BADOPTION && ec != PCRE2_ERROR_NOMEMORY)
