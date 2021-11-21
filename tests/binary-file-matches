@@ -14,8 +14,10 @@ fail=0
 echo "grep: (standard input): binary file matches" > exp \
   || framework_failure_
 
-printf 'a\0' | grep a > out 2> err || fail=1
-compare /dev/null out || fail=1
-compare exp err || fail=1
+for option in '' -s; do
+  printf 'a\0' | grep $option a > out 2> err || fail=1
+  compare /dev/null out || fail=1
+  compare exp err || fail=1
+done
 
 Exit $fail

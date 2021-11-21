@@ -1646,7 +1646,7 @@ grep (int fd, struct stat const *st, bool *ineof)
  finish_grep:
   done_on_match = done_on_match_0;
   out_quiet = out_quiet_0;
-  if (binary_files == BINARY_BINARY_FILES && ! (out_quiet | suppress_errors)
+  if (binary_files == BINARY_BINARY_FILES && !out_quiet
       && (encoding_error_output
           || (0 <= nlines_first_null && nlines_first_null < nlines)))
     error (0, 0, _("%s: binary file matches"), input_filename ());
