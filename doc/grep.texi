@@ -615,7 +615,7 @@ By default, @var{type} is @samp{binary}, and @command{grep}
 suppresses output after null input binary data is discovered,
 and suppresses output lines that contain improperly encoded data.
 When some output is suppressed, @command{grep} follows any output
-with a one-line message saying that a binary file matches.
+with a message to standard error saying that a binary file matches.
 
 If @var{type} is @samp{without-match},
 when @command{grep} discovers null input binary data
