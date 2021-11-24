@@ -161,6 +161,7 @@ TESTS =						\
   stack-overflow				\
   status					\
   surrogate-pair				\
+  surrogate-search				\
   symlink					\
   triple-backref				\
   turkish-I					\
