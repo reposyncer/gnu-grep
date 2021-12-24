@@ -30,6 +30,7 @@ url_dir_list = https://ftp.gnu.org/gnu/$(PACKAGE)
 
 # Tests not to run as part of "make distcheck".
 local-checks-to-skip =			\
+  sc_indent				\
   sc_texinfo_acronym
 
 # Tools used to bootstrap this package, used for "announcement".
@@ -40,7 +41,8 @@ announcement_Cc_ = $(translation_project_), $(PACKAGE)-devel@gnu.org
 
 # The tight_scope test gets confused about inline functions.
 # like 'to_uchar'.
-_gl_TS_unmarked_extern_functions = main usage mb_clen to_uchar dfaerror dfawarn
+_gl_TS_unmarked_extern_functions = \
+  main usage mb_clen to_uchar dfaerror dfawarn imbrlen
 
 # Now that we have better tests, make this the default.
 export VERBOSE = yes
