@@ -74,31 +74,59 @@ cu_have_perl=yes
 case $PERL in *"/missing "*) cu_have_perl=no;; esac
 AM_CONDITIONAL([HAVE_PERL], [test $cu_have_perl = yes])
 
+# gl_GCC_VERSION_IFELSE([major], [minor], [run-if-found], [run-if-not-found])
+# ------------------------------------------------
+# If $CPP is gcc-MAJOR.MINOR or newer, then run RUN-IF-FOUND.
+# Otherwise, run RUN-IF-NOT-FOUND.
+AC_DEFUN([gl_GCC_VERSION_IFELSE],
+  [AC_PREPROC_IFELSE(
+    [AC_LANG_PROGRAM(
+      [[
+#if ($1) < __GNUC__ || (($1) == __GNUC__ && ($2) <= __GNUC_MINOR__)
+/* ok */
+#else
+# error "your version of gcc is older than $1.$2"
+#endif
+      ]]),
+    ], [$3], [$4])
+  ]
+)
+
 AC_ARG_ENABLE([gcc-warnings],
-  [AS_HELP_STRING([--enable-gcc-warnings],
-                  [turn on lots of GCC warnings (for developers)])],
+  [AS_HELP_STRING([--enable-gcc-warnings@<:@=TYPE@:>@],
+    [control generation of GCC warnings.  The TYPE 'no' disables
+     warnings (default for non-developer builds); 'yes' generates
+     cheap warnings if available (default for developer builds);
+     'expensive' in addition generates expensive-to-compute warnings
+     if available.])],
   [case $enableval in
-     yes|no) ;;
+     no|yes|expensive) ;;
      *)      AC_MSG_ERROR([bad value $enableval for gcc-warnings option]) ;;
    esac
    gl_gcc_warnings=$enableval],
-  [gl_gcc_warnings=no
-   if test "$GCC" = yes && test -d "$srcdir"/.git; then
-     AC_COMPILE_IFELSE(
-       [AC_LANG_PROGRAM([[
-          #if ! (6 < __GNUC__ + (2 <= __GNUC_MINOR__))
-            #error "--enable-gcc-warnings defaults to 'no' on older GCC"
-          #endif
-          ]])],
-       [gl_gcc_warnings=yes])
-   fi]
+  [
+   # GCC provides fine-grained control over diagnostics which
+   # is used in gnulib for example to suppress warnings from
+   # certain sections of code.  So if this is available and
+   # we're running from a git repo, then auto enable the warnings.
+   gl_gcc_warnings=no
+   gl_GCC_VERSION_IFELSE([4], [6],
+                         [test -d "$srcdir"/.git \
+                          && ! test -f "$srcdir"/.tarball-version \
+                          && gl_gcc_warnings=yes])]
 )
 
-if test "$gl_gcc_warnings" = yes; then
+if test $gl_gcc_warnings != no; then
   gl_WARN_ADD([-Werror], [WERROR_CFLAGS])
   AC_SUBST([WERROR_CFLAGS])
 
-  nw=
+  ew=
+  AS_IF([test $gl_gcc_warnings != expensive],
+    [# -fanalyzer and related options slow GCC considerably.
+     ew="$ew -fanalyzer -Wno-analyzer-double-free -Wno-analyzer-malloc-leak"
+     ew="$ew -Wno-analyzer-null-dereference -Wno-analyzer-use-after-free"])
+
+  nw=$ew
   # This, $nw, is the list of warnings we disable.
   nw="$nw -Wdeclaration-after-statement" # too useful to forbid
   nw="$nw -Waggregate-return"       # anachronistic
