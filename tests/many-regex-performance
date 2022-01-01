@@ -3,7 +3,7 @@
 # grep-3.4 would require O(N^2) RSS for N regexps
 # grep-3.5 requires O(N) in the most common cases.
 
-# Copyright 2020-2021 Free Software Foundation, Inc.
+# Copyright 2020-2022 Free Software Foundation, Inc.
 
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
