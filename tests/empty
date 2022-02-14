@@ -40,16 +40,9 @@ for locale in C en_US.UTF-8; do
         fi
 
         # should return 0 found a match
-        echo "" | LC_ALL=$locale timeout 10s grep $options -e ''
-        if test $? -ne 0 ; then
-          echo "Status: Wrong status code, test \#4 failed ($options $locale)"
-          failures=1
-        fi
-
-        # should return 0 found a match
         echo abcd | LC_ALL=$locale timeout 10s grep $options -e ''
         if test $? -ne 0 ; then
-          echo "Status: Wrong status code, test \#5 failed ($options $locale)"
+          echo "Status: Wrong status code, test \#4 failed ($options $locale)"
           failures=1
         fi
     done
