@@ -3008,6 +3008,5 @@ main (int argc, char **argv)
     status &= grep_command_line_arg (*files++);
   while (*files != NULL);
 
-  /* We register via atexit to test stdout.  */
   return errseen ? EXIT_TROUBLE : status;
 }
