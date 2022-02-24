@@ -1863,6 +1863,22 @@ cat /etc/passwd | grep 'alain' - /etc/motd
 @end example
 
 @item
+Why can't I combine the shell's @samp{set -e} with @command{grep}?
+
+The @command{grep} command follows the convention of programs like
+@command{cmp} and @command{diff} where an exit status of 1 is not an
+error.  The shell command @samp{set -e} causes the shell to exit if
+any subcommand exits with nonzero status, and this will cause the
+shell to exit merely because @command{grep} selected no lines,
+which is ordinarily not what you want.
+
+There is a related problem with Bash's @command{set -e -o pipefail}.
+Since @command{grep} does not always read all its input, a command
+outputting to a pipe read by @command{grep} can fail when
+@command{grep} exits before reading all its input, and the command's
+failure can cause Bash to exit.
+
+@item
 Why is this back-reference failing?
 
 @example
@@ -1997,6 +2013,14 @@ needing to read the zeros.  This optimization is not available if the
 @option{-a} (@option{--binary-files=text}) option is used (@pxref{File and
 Directory Selection}), unless the @option{-z} (@option{--null-data})
 option is also used (@pxref{Other Options}).
+
+@cindex pipelines and reading
+For efficiency @command{grep} does not always read all its input.
+For example, the shell command @samp{sed '/^...$/d' | grep -q X} can
+cause @command{grep} to exit immediately after reading a line
+containing @samp{X}, without bothering to read the rest of its input data.
+This in turn can cause @command{sed} to exit with a nonzero status because
+@command{sed} cannot write to its output pipe after @command{grep} exits.
 
 For more about the algorithms used by @command{grep} and about
 related string matching algorithms, see:
