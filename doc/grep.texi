@@ -1719,24 +1719,38 @@ grep -r --include='*.c' 'hello' /home/gigi
 
 @item
 What if a pattern or file has a leading @samp{-}?
+For example:
 
 @example
-grep -- '--cut here--' *
+grep "$pattern" *
 @end example
 
 @noindent
-searches for all lines matching @samp{--cut here--}.
-Without @option{--},
-@command{grep} would attempt to parse @samp{--cut here--} as a list of
-options, and there would be similar problems with any file names
-beginning with @samp{-}.
-
-Alternatively, you can prevent misinterpretation of leading @samp{-}
-by using @option{-e} for patterns and leading @samp{./} for files:
+can behave unexpectedly if the value of @samp{pattern} begins with @samp{-},
+or if the @samp{*} expands to a file name with leading @samp{-}.
+To avoid the problem, you can use @option{-e} for patterns and leading
+@samp{./} for files:
 
 @example
-grep -e '--cut here--' ./*
+grep -e "$pattern" ./*
 @end example
+
+@noindent
+searches for all lines matching the pattern in all the working
+directory's files whose names do not begin with @samp{.}.
+Without the @option{-e}, @command{grep} might treat the pattern as an
+option if it begins with @samp{-}.  Without the @samp{./}, there might
+be similar problems with file names beginning with @samp{-}.
+
+Alternatively, you can use @samp{--} before the pattern and file names:
+
+@example
+grep -- "$pattern" *
+@end example
+
+@noindent
+This also fixes the problem, except that if there is a file named @samp{-},
+@command{grep} misinterprets the @samp{-} as standard input.
 
 @item
 Suppose I want to search for a whole word, not a part of a word?
