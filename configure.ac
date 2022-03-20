@@ -128,18 +128,9 @@ if test $gl_gcc_warnings != no; then
 
   nw=$ew
   # This, $nw, is the list of warnings we disable.
-  nw="$nw -Wdeclaration-after-statement" # too useful to forbid
-  nw="$nw -Waggregate-return"       # anachronistic
-  nw="$nw -Wlong-long"              # C90 is anachronistic (lib/gethrxtime.h)
-  nw="$nw -Wc++-compat"             # We don't care about C++ compilers
-  nw="$nw -Wundef"                  # Warns on '#if GNULIB_FOO' etc in gnulib
+  nw="$nw -Wvla"                    # suppress a warning in regexec.h
   nw="$nw -Wsystem-headers"         # Don't let system headers trigger warnings
-  nw="$nw -Wpadded"                 # Our structs are not padded
-  nw="$nw -Wstack-protector"        # generates false alarms for useful code
-  nw="$nw -Wswitch-default"         # Too many warnings for now
-  nw="$nw -Wunsafe-loop-optimizations" # OK to suppress unsafe optimizations
-  nw="$nw -Winline"                 # streq.h's streq4, streq6 and strcaseeq6
-  nw="$nw -Wstrict-overflow"        # regexec.c
+
 
   gl_MANYWARN_ALL_GCC([ws])
   gl_MANYWARN_COMPLEMENT([ws], [$ws], [$nw])
