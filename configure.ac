@@ -129,8 +129,8 @@ if test $gl_gcc_warnings != no; then
   nw=$ew
   # This, $nw, is the list of warnings we disable.
   nw="$nw -Wvla"                    # suppress a warning in regexec.h
+  nw="$nw -Winline"                 # suppress warnings from streq.h's streq5
   nw="$nw -Wsystem-headers"         # Don't let system headers trigger warnings
-
 
   gl_MANYWARN_ALL_GCC([ws])
   gl_MANYWARN_COMPLEMENT([ws], [$ws], [$nw])
