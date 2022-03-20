@@ -104,6 +104,7 @@ TESTS =						\
   fgrep-longest					\
   file						\
   filename-lineno.pl				\
+  fillbuf-long-line				\
   fmbtest					\
   foad1						\
   grep-dev-null					\

@@ -984,7 +984,7 @@ fillbuf (idx_t save, struct stat const *st)
               ptrdiff_t a;
               if (0 <= to_be_read
                   && INT_ADD_OK (to_be_read, save + min_after_buflim, &a))
-                alloc_max = a;
+                alloc_max = MAX (a, bufalloc + incr_min);
             }
 
           newbuf = xpalloc (NULL, &bufalloc, incr_min, alloc_max, 1);
