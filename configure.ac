@@ -131,6 +131,7 @@ if test $gl_gcc_warnings != no; then
   nw="$nw -Wvla"                    # suppress a warning in regexec.h
   nw="$nw -Winline"                 # suppress warnings from streq.h's streq5
   nw="$nw -Wsystem-headers"         # Don't let system headers trigger warnings
+  nw="$nw -Wstack-protector"        # generates false alarms for useful code
 
   gl_MANYWARN_ALL_GCC([ws])
   gl_MANYWARN_COMPLEMENT([ws], [$ws], [$nw])
