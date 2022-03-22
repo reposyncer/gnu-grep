@@ -154,14 +154,15 @@ Pcompile (char *pattern, idx_t size, reg_syntax_t ignored, bool exact)
 #ifdef PCRE2_MATCH_INVALID_UTF
       /* Consider invalid UTF-8 as a barrier, instead of error.  */
       flags |= PCRE2_MATCH_INVALID_UTF;
-
-# if ! (10 < PCRE2_MAJOR + (36 <= PCRE2_MINOR))
-      /* Work around PCRE2 bug 2642.  */
-      if (flags & PCRE2_CASELESS)
-        flags |= PCRE2_NO_START_OPTIMIZE;
-# endif
 #endif
     }
+
+#if defined PCRE2_MATCH_INVALID_UTF && !(10 < PCRE2_MAJOR + (36 <= PCRE2_MINOR))
+  /* Work around PCRE2 bug 2642, and another bug reportedly fixed in
+     PCRE2 commit e0c6029a62db9c2161941ecdf459205382d4d379.  */
+  if (flags & (PCRE2_UTF | PCRE2_CASELESS))
+    flags |= PCRE2_NO_START_OPTIMIZE;
+#endif
 
   /* FIXME: Remove this restriction.  */
   if (rawmemchr (pattern, '\n') != patlim)
