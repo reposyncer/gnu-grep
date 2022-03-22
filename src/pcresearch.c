@@ -154,6 +154,12 @@ Pcompile (char *pattern, idx_t size, reg_syntax_t ignored, bool exact)
 #ifdef PCRE2_MATCH_INVALID_UTF
       /* Consider invalid UTF-8 as a barrier, instead of error.  */
       flags |= PCRE2_MATCH_INVALID_UTF;
+
+# if ! (10 < PCRE2_MAJOR + (36 <= PCRE2_MINOR))
+      /* Work around PCRE2 bug 2642.  */
+      if (flags & PCRE2_CASELESS)
+        flags |= PCRE2_NO_START_OPTIMIZE;
+# endif
 #endif
     }
 
