@@ -157,13 +157,6 @@ Pcompile (char *pattern, idx_t size, reg_syntax_t ignored, bool exact)
 #endif
     }
 
-#if defined PCRE2_MATCH_INVALID_UTF && !(10 < PCRE2_MAJOR + (36 <= PCRE2_MINOR))
-  /* Work around PCRE2 bug 2642, and another bug reportedly fixed in
-     PCRE2 commit e0c6029a62db9c2161941ecdf459205382d4d379.  */
-  if (flags & (PCRE2_UTF | PCRE2_CASELESS))
-    flags |= PCRE2_NO_START_OPTIMIZE;
-#endif
-
   /* FIXME: Remove this restriction.  */
   if (rawmemchr (pattern, '\n') != patlim)
     die (EXIT_TROUBLE, 0, _("the -P option only supports a single pattern"));
