@@ -1162,8 +1162,8 @@ by using various operators to combine smaller expressions.
 three different versions of regular expression syntax:
 basic (BRE), extended (ERE), and Perl-compatible (PCRE).
 In GNU @command{grep},
-there is no difference in available functionality between the basic and
-extended syntaxes.
+there is no difference in available functionality between basic and
+extended syntax.
 In other implementations, basic regular expressions are less powerful.
 The following description applies to extended regular expressions;
 differences for basic regular expressions are summarized afterwards.

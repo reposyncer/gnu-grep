@@ -31,10 +31,10 @@ expensive_
 # systems this first invocation takes at least 10ms of user time.
 word_list=/usr/share/dict/linux.words
 
-# If $word_list does not exist, generate an input that exibhits
+# If $word_list does not exist, generate an input that exhibits
 # similar performance characteristics.
 if ! test -f $word_list; then
-  # Generate data comprable to that word list.
+  # Generate data comparable to that word list.
   # Note how all "words" start with "a", and that there is
   # a small percentage of lines with at least one "." metachar.
   # This requires /dev/urandom, so if it's not present, skip
