@@ -110,6 +110,7 @@ TESTS =						\
   grep-dev-null					\
   grep-dev-null-out				\
   grep-dir					\
+  hangul-syllable				\
   hash-collision-perf				\
   help-version					\
   high-bit-range				\

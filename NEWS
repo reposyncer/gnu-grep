@@ -13,6 +13,13 @@ GNU grep NEWS                                    -*- outline -*-
 
 ** Bug fixes
 
+  In locales using UTF-8 encoding, the regular expression '.' no
+  longer sometimes fails to match Unicode characters U+D400 through
+  U+D7FF (some Hangul Syllables, and Hangul Jamo Extended-B) and
+  Unicode characters U+108000 through U+10FFFF (half of Supplemental
+  Private Use Area plane B).
+  [bug introduced in grep 3.4]
+
   The -s option no longer suppresses "binary file matches" messages.
   [Bug#51860 introduced in grep 3.5]
 

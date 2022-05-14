@@ -1,0 +1,88 @@
+#!/bin/sh
+# grep 3.4 through 3.7 mishandled matching '.' against the valid UTF-8
+# sequences (ED)(90-9F)(80-BF) corresponding to U+D400 through U+D7FF,
+# which are some Hangul Syllables and Hangul Jamo Extended-B.  They
+# also mishandled (F4)(88-8F)(80-BF)(80-BF) which correspond to
+# U+108000 through U+10FFFF (Supplemental Private Use Area plane B).
+
+. "${srcdir=.}/init.sh"; path_prepend_ ../src
+
+require_en_utf8_locale_
+
+LC_ALL=en_US.UTF-8
+export LC_ALL
+
+check_char ()
+{
+  printf "$1\\n" >in || framewmork_failure_
+
+  grep $2 '^.$' in >out || fail=1
+  cmp in out || fail=1
+}
+
+fail=0
+
+# "." should match U+D45C HANGUL SYLLABLE PYO.
+check_char '\355\221\234'
+
+# Check boundary-condition characters
+# while we are at it.
+
+check_char '\0' -a
+check_char '\177'
+
+for i in 302 337; do
+  for j in 200 277; do
+    check_char "\\$i\\$j"
+  done
+done
+for i in 340; do
+  for j in 240 277; do
+    for k in 200 277; do
+      check_char "\\$i\\$j\\$k"
+    done
+  done
+done
+for i in 341 354 356 357; do
+  for j in 200 277; do
+    for k in 200 277; do
+      check_char "\\$i\\$j\\$k"
+    done
+  done
+done
+for i in 355; do
+  for j in 200 237; do
+    for k in 200 277; do
+      check_char "\\$i\\$j\\$k"
+    done
+  done
+done
+for i in 360; do
+  for j in 220 277; do
+    for k in 200 277; do
+      for l in 200 277; do
+        check_char "\\$i\\$j\\$k\\$l"
+      done
+    done
+  done
+done
+for i in 361 363; do
+  for j in 200 277; do
+    for k in 200 277; do
+      for l in 200 277; do
+        check_char "\\$i\\$j\\$k\\$l"
+      done
+    done
+  done
+done
+for i in 364; do
+  for j in 200 217; do
+    for k in 200 277; do
+      for l in 200 277; do
+        check_char "\\$i\\$j\\$k\\$l"
+      done
+    done
+  done
+done
+
+Exit $fail
