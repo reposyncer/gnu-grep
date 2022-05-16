@@ -341,6 +341,10 @@ Scanning each input file stops upon first match.
 @opindex --max-count
 @cindex max-count
 Stop after the first @var{num} selected lines.
+If @var{num} is zero, @command{grep} stops right away without reading input.
+A @var{num} of @minus{}1 is treated as infinity and @command{grep}
+does not stop; this is the default.
+
 If the input is standard input from a regular file,
 and @var{num} selected lines are output,
 @command{grep} ensures that the standard input is positioned

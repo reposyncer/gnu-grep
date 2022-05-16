@@ -321,6 +321,16 @@ Scanning each input file stops upon first match.
 Stop reading a file after
 .I NUM
 matching lines.
+If
+.I NUM
+is zero,
+.B grep
+stops right away without reading input.
+A
+.I NUM
+of \-1 is treated as infinity and
+.B grep
+does not stop; this is the default.
 If the input is standard input from a regular file,
 and
 .I NUM
