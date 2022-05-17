@@ -12,6 +12,7 @@ require_en_utf8_locale_
 LC_ALL=en_US.UTF-8
 export LC_ALL
 
+# Check that '.' completely matches $1, i.e., that $1 is a single UTF-8 char.
 check_char ()
 {
   printf "$1\\n" >in || framewmork_failure_
@@ -20,26 +21,51 @@ check_char ()
   cmp in out || fail=1
 }
 
+# Check that '.*' does not completely match $1, i.e., that
+# $1 contains an encoding error.
+check_nonchar ()
+{
+  printf "$1\\n" >in || framewmork_failure_
+
+  grep -a -v '^.*$' in >out || fail=1
+  cmp in out || fail=1
+}
+
 fail=0
 
 # "." should match U+D45C HANGUL SYLLABLE PYO.
 check_char '\355\221\234'
 
-# Check boundary-condition characters
+# Check boundary-condition characters, and non-characters,
 # while we are at it.
 
 check_char '\0' -a
 check_char '\177'
+check_nonchar '\200'
+check_nonchar '\277'
+check_nonchar '\300\200'
+check_nonchar '\301\277'
 
 for i in 302 337; do
   for j in 200 277; do
     check_char "\\$i\\$j"
+  done
+  for j in 177 300; do
+    check_nonchar "\\$i\\$j"
   done
 done
 for i in 340; do
   for j in 240 277; do
     for k in 200 277; do
       check_char "\\$i\\$j\\$k"
+    done
+    for k in 177 300; do
+      check_nonchar "\\$i\\$j\\$k"
+    done
+  done
+  for j in 239 300; do
+    for k in 177 200 277 300; do
+      check_nonchar "\\$i\\$j\\$k"
     done
   done
 done
@@ -48,12 +74,28 @@ for i in 341 354 356 357; do
     for k in 200 277; do
       check_char "\\$i\\$j\\$k"
     done
+    for k in 177 300; do
+      check_nonchar "\\$i\\$j\\$k"
+    done
+  done
+  for j in 177 300; do
+    for k in 177 200 277 300; do
+      check_nonchar "\\$i\\$j\\$k"
+    done
   done
 done
 for i in 355; do
   for j in 200 237; do
     for k in 200 277; do
       check_char "\\$i\\$j\\$k"
+    done
+    for k in 177 300; do
+      check_nonchar "\\$i\\$j\\$k"
+    done
+  done
+  for j in 177 240; do
+    for k in 177 200 277 300; do
+      check_nonchar "\\$i\\$j\\$k"
     done
   done
 done
@@ -62,6 +104,21 @@ for i in 360; do
     for k in 200 277; do
       for l in 200 277; do
         check_char "\\$i\\$j\\$k\\$l"
+      done
+      for l in 177 300; do
+        check_nonchar "\\$i\\$j\\$k\\$l"
+      done
+    done
+    for k in 177 300; do
+      for l in 177 200 277 300; do
+        check_nonchar "\\$i\\$j\\$k\\$l"
+      done
+    done
+  done
+  for j in 217 300; do
+    for k in 177 200 277 300; do
+      for l in 177 200 277 300; do
+        check_nonchar "\\$i\\$j\\$k\\$l"
       done
     done
   done
@@ -72,6 +129,21 @@ for i in 361 363; do
       for l in 200 277; do
         check_char "\\$i\\$j\\$k\\$l"
       done
+      for l in 177 300; do
+        check_nonchar "\\$i\\$j\\$k\\$l"
+      done
+    done
+    for k in 177 300; do
+      for l in 177 200 277 300; do
+        check_nonchar "\\$i\\$j\\$k\\$l"
+      done
+    done
+  done
+  for j in 177 300; do
+    for k in 177 200 277 300; do
+      for l in 177 200 277 300; do
+        check_nonchar "\\$i\\$j\\$k\\$l"
+      done
     done
   done
 done
@@ -80,6 +152,21 @@ for i in 364; do
     for k in 200 277; do
       for l in 200 277; do
         check_char "\\$i\\$j\\$k\\$l"
+      done
+      for l in 177 300; do
+        check_nonchar "\\$i\\$j\\$k\\$l"
+      done
+    done
+    for k in 177 300; do
+      for l in 177 200 277 300; do
+        check_nonchar "\\$i\\$j\\$k\\$l"
+      done
+    done
+  done
+  for j in 177 220; do
+    for k in 177 200 277 300; do
+      for l in 177 200 277 300; do
+        check_nonchar "\\$i\\$j\\$k\\$l"
       done
     done
   done
