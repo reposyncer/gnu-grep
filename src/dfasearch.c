@@ -53,14 +53,10 @@ dfaerror (char const *mesg)
   die (EXIT_TROUBLE, 0, "%s", mesg);
 }
 
-/* For now, the sole dfawarn-eliciting condition (use of a regexp
-   like '[:lower:]') is unequivocally an error, so treat it as such,
-   when possible.  */
-void
+_Noreturn void
 dfawarn (char const *mesg)
 {
-  if (!getenv ("POSIXLY_CORRECT"))
-    dfaerror (mesg);
+  dfaerror (mesg);
 }
 
 /* If the DFA turns out to have some set of fixed strings one of

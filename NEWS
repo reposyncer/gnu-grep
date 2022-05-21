@@ -11,6 +11,9 @@ GNU grep NEWS                                    -*- outline -*-
   release 2.5.3 (2007), now warn that they are obsolescent and should
   be replaced by grep -E and grep -F.
 
+  Regular expressions like [:space:] are now errors even if
+  POSIXLY_CORRECT is set, since POSIX now allows the GNU behavior.
+
 ** Bug fixes
 
   In locales using UTF-8 encoding, the regular expression '.' no
