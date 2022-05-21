@@ -1013,7 +1013,7 @@ They are omitted (i.e., false) by default and become true when specified.
 @cindex national language support
 @cindex NLS
 These variables specify the locale for the @env{LC_COLLATE} category,
-which might affect how range expressions like @samp{[a-z]} are
+which might affect how range expressions like @samp{a-z} are
 interpreted.
 
 @item LC_ALL
@@ -1269,6 +1269,15 @@ A whole expression may be enclosed in parentheses
 to override these precedence rules and form a subexpression.
 An unmatched @samp{)} matches just itself.
 
+Some strings are not valid regular expressions and cause
+@command{grep} to issue a diagnostic and fail.  For example, @samp{xy\1}
+is invalid because there is no parenthesized subexpression for the
+back-reference @samp{\1} to refer to.  Also, some regular expressions
+have unspecified behavior and should be avoided in portable scripts
+even if @command{grep} does not currently diagnose them.  For example,
+@samp{xy\0} has unspecified behavior because @samp{0} is not a special
+character and there is no documentation for the behavior of @samp{\0}.
+
 @node Character Classes and Bracket Expressions
 @section Character Classes and Bracket Expressions
 
@@ -1296,7 +1305,7 @@ order; for example, @samp{[a-d]} is equivalent to @samp{[abcd]}.
 In other locales, the sorting sequence is not specified, and
 @samp{[a-d]} might be equivalent to @samp{[abcd]} or to
 @samp{[aBbCcDd]}, or it might fail to match any character, or the set of
-characters that it matches might even be erratic.
+characters that it matches might be erratic, or it might be invalid.
 To obtain the traditional interpretation
 of bracket expressions, you can use the @samp{C} locale by setting the
 @env{LC_ALL} environment variable to the value @samp{C}.
@@ -1483,6 +1492,13 @@ Match non-whitespace, it is a synonym for @samp{[^[:space:]]}.
 For example, @samp{\brat\b} matches the separate word @samp{rat},
 @samp{\Brat\B} matches @samp{crate} but not @samp{furry rat}.
 
+The behavior of @command{grep} is unspecified if a unescaped backslash
+is not followed by a special character, a nonzero digit, or a
+character in the above list.  Although @command{grep} might issue a
+diagnostic and/or give the backslash an interpretation now, its
+behavior may change if the syntax of regular expressions is extended
+in future versions.
+
 @node Anchoring
 @section Anchoring
 @cindex anchoring
@@ -1508,6 +1524,8 @@ for example, @samp{(a)*\1} fails to match @samp{a}.
 If the parenthesized subexpression matches more than one substring,
 the back-reference refers to the last matched substring;
 for example, @samp{^(ab*)*\1$} matches @samp{ababbabb} but not @samp{ababbab}.
+The back-reference @samp{\@var{n}} is invalid
+if preceded by fewer than @var{n} subexpressions.
 When multiple regular expressions are given with
 @option{-e} or from a file (@samp{-f @var{file}}),
 back-references are local to each expression.
@@ -1530,26 +1548,43 @@ POSIX says they produce unspecified results:
 
 @itemize @bullet
 @item
-Extended regular expressions that use back-references.
+An extended regular expression that uses back-references.
 @item
-Basic regular expressions that use @samp{\?}, @samp{\+}, or @samp{\|}.
+A basic regular expression that uses @samp{\?}, @samp{\+}, or @samp{\|}.
 @item
-Empty parenthesized regular expressions like @samp{()}.
+An empty parenthesized regular expression like @samp{()}.
 @item
-Empty alternatives (as in, e.g, @samp{a|}).
+An empty alternative (as in, e.g, @samp{a|}).
 @item
-Repetition operators that immediately follow empty expressions,
-unescaped @samp{$}, or other repetition operators.
+A repetition operator that immediately follows an empty expression,
+unescaped @samp{$}, or another repetition operator.
 @item
-Interval expressions containing repetition counts greater than 255.
+An interval expression with a repetition count greater than 255.
+@item
+A basic regular expression with unbalanced @samp{\(} or @samp{\)},
+or an extended regular expression with unbalanced @samp{(}.
+@item
+A bracket expression that contains at least three elements, the first
+and last of which are both @samp{:}, or both @samp{.}, or both
+@samp{=}.  For example, it is unspecified whether the bracket expression
+@samp{[:alpha:]} is equivalent to @samp{[[:alpha:]]}, equivalent to
+@samp{[:ahlp]}, or invalid.
+@item
+A range expression like @samp{z-a} that represents zero elements;
+it might never match, or it might be invalid.
+@item
+A range expression outside the POSIX locale.
 @item
 A backslash escaping an ordinary character (e.g., @samp{\S}),
 unless it is a back-reference.
 @item
+An unescaped backslash at the end of a regular expression.
+@item
 An unescaped @samp{[} that is not part of a bracket expression.
 @item
-In extended regular expressions, an unescaped @samp{@{} that is not
-part of an interval expression.
+A @samp{\@{} in a basic regular expression (or an unescaped @samp{@{}
+in an extended regular expression) that does not start an interval
+expression.
 @end itemize
 
 @cindex interval expressions
