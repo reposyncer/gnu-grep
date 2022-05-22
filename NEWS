@@ -26,6 +26,11 @@ GNU grep NEWS                                    -*- outline -*-
   The -s option no longer suppresses "binary file matches" messages.
   [Bug#51860 introduced in grep 3.5]
 
+** Documentation improvements
+
+  The manual now covers unspecified behavior in patterns like \x, (+),
+  and range expressions outside the POSIX locale.
+
 
 * Noteworthy changes in release 3.7 (2021-08-14) [stable]
 
