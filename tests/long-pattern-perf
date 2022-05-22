@@ -24,6 +24,7 @@ fail=0
 # system load during the two test runs, so we'll mark it as
 # "expensive", making it less likely to be run by regular users.
 expensive_
+require_perl_
 
 echo x > in || framework_failure_
 # Note that we want 10x the byte count (not line count) in the larger file.

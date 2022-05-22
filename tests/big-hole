@@ -4,6 +4,7 @@
 . "${srcdir=.}/init.sh"; path_prepend_ ../src
 
 expensive_
+require_perl_
 
 # Skip this test if there is no usable SEEK_HOLE support,
 # as is the case with linux-3.5.0 on ext4 and tmpfs file systems.

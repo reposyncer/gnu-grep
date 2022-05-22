@@ -21,6 +21,8 @@
 
 fail=0
 
+require_perl_
+
 : > empty || framework_failure_
 
 # Construct a test case that consumes enough CPU time that we don't

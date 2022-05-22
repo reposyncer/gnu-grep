@@ -26,6 +26,7 @@ fail=0
 # system load during the two test runs, so we'll mark it as
 # "expensive", making it less likely to be run by regular users.
 expensive_
+require_perl_
 
 # Make the quick/small input large enough so that even on high-end
 # systems this first invocation takes at least 10ms of user time.
