@@ -11,6 +11,12 @@ GNU grep NEWS                                    -*- outline -*-
   release 2.5.3 (2007), now warn that they are obsolescent and should
   be replaced by grep -E and grep -F.
 
+  Regular expressions with stray backslashes now cause warnings, as
+  their unspecified behavior can lead to unexpected results.
+  For example, '\a' and 'a' are not always equivalent
+  <https://bugs.gnu.org/39768>.  The warnings are intended as a
+  transition aid; they are likely to be errors in future releases.
+
   Regular expressions like [:space:] are now errors even if
   POSIXLY_CORRECT is set, since POSIX now allows the GNU behavior.
 

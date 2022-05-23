@@ -53,10 +53,10 @@ dfaerror (char const *mesg)
   die (EXIT_TROUBLE, 0, "%s", mesg);
 }
 
-_Noreturn void
+void
 dfawarn (char const *mesg)
 {
-  dfaerror (mesg);
+  error (0, 0, _("warning: %s"), mesg);
 }
 
 /* If the DFA turns out to have some set of fixed strings one of
@@ -196,7 +196,8 @@ GEAcompile (char *pattern, idx_t size, reg_syntax_t syntax_bits,
 
   if (match_icase)
     syntax_bits |= RE_ICASE;
-  int dfaopts = eolbyte ? 0 : DFA_EOL_NUL;
+  int dfaopts = (DFA_CONFUSING_BRACKETS_ERROR | DFA_STRAY_BACKSLASH_WARN
+                 | (eolbyte ? 0 : DFA_EOL_NUL));
   dfasyntax (dc->dfa, &localeinfo, syntax_bits, dfaopts);
   bool bs_safe = !localeinfo.multibyte | localeinfo.using_utf8;
 
