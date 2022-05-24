@@ -29,5 +29,6 @@ lib/quotearg.c
 lib/regcomp.c
 lib/version-etc.c
 lib/xalloc-die.c
+src/dfasearch.c
 src/grep.c
 src/pcresearch.c
