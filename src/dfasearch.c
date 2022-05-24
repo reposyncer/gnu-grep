@@ -197,6 +197,8 @@ GEAcompile (char *pattern, idx_t size, reg_syntax_t syntax_bits,
   if (match_icase)
     syntax_bits |= RE_ICASE;
   int dfaopts = (DFA_CONFUSING_BRACKETS_ERROR | DFA_STRAY_BACKSLASH_WARN
+                 | DFA_PLUS_WARN
+                 | (syntax_bits & RE_CONTEXT_INDEP_OPS ? DFA_STAR_WARN : 0)
                  | (eolbyte ? 0 : DFA_EOL_NUL));
   dfasyntax (dc->dfa, &localeinfo, syntax_bits, dfaopts);
   bool bs_safe = !localeinfo.multibyte | localeinfo.using_utf8;
