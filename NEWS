@@ -14,7 +14,7 @@ GNU grep NEWS                                    -*- outline -*-
   Regular expressions with stray backslashes now cause warnings, as
   their unspecified behavior can lead to unexpected results.
   For example, '\a' and 'a' are not always equivalent
-  <https://bugs.gnu.org/39768>.  Similarly, regular expressions or
+  <https://bugs.gnu.org/39678>.  Similarly, regular expressions or
   subexpressions that start with a repetition operator now also cause
   warnings due to their unspecified behavior; for example, *a(+b|{1}c)
   now has three reasons to warn.  The warnings are intended as a
