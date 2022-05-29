@@ -308,10 +308,6 @@ The colors are defined by the environment variable @env{GREP_COLORS}
 and default to @samp{ms=01;31:mc=01;31:sl=:cx=:fn=35:ln=32:bn=32:se=36}
 for bold red matched text, magenta file names, green line numbers,
 green byte offsets, cyan separators, and default terminal colors otherwise.
-The deprecated environment variable @env{GREP_COLOR} is still supported,
-but its setting does not have priority;
-it defaults to @samp{01;31} (bold red)
-which only covers the color for matched text.
 @var{WHEN} is @samp{never}, @samp{always}, or @samp{auto}.
 
 @item -L
@@ -816,8 +812,10 @@ this option can be used with commands like
 @node Environment Variables
 @section Environment Variables
 
-The behavior of @command{grep} is affected
-by the following environment variables.
+The behavior of @command{grep} is affected by several environment
+variables, the most important of which control the locale, which
+specifies how @command{grep} interprets characters in its patterns and
+data.
 
 @vindex LANGUAGE @r{environment variable}
 @vindex LC_ALL @r{environment variable}
@@ -842,7 +840,34 @@ or if @command{grep} was not compiled
 with national language support (NLS).
 The shell command @code{locale -a} lists locales that are currently available.
 
-Many of the environment variables in the following list let you
+@cindex environment variables
+The following environment variables affect the behavior of @command{grep}.
+
+@table @env
+
+@item GREP_COLOR
+@vindex GREP_COLOR @r{environment variable}
+@cindex highlight markers
+This obsolescent variable interacts with @env{GREP_COLORS}
+confusingly, and @command{grep} warns if it is set and is not
+overridden by @env{GREP_COLORS}.  Instead of
+@samp{GREP_COLOR='@var{color}'}, you can use
+@samp{GREP_COLORS='mt=@var{color}'}.
+
+@item GREP_COLORS
+@vindex GREP_COLORS @r{environment variable}
+@cindex highlight markers
+This variable specifies the colors and other attributes
+used to highlight various parts of the output.
+Its value is a colon-separated list of @code{terminfo} capabilities
+that defaults to @samp{ms=01;31:mc=01;31:sl=:cx=:fn=35:ln=32:bn=32:se=36}
+with the @samp{rv} and @samp{ne} boolean capabilities omitted (i.e., false).
+The two-letter capability names
+refer to terminal ``capabilities,'' the ability
+of a terminal to highlight text, or change its color, and so on.
+These capabilities are stored in an online database and accessed by
+the @code{terminfo} library.
+Nonempty capability values
 control highlighting using
 Select Graphic Rendition (SGR)
 commands interpreted by the terminal or terminal emulator.
@@ -870,38 +895,6 @@ for 88-color and 256-color modes foreground colors,
 and @samp{48;5;0} to @samp{48;5;255}
 for 88-color and 256-color modes background colors.
 
-The two-letter names used in the @env{GREP_COLORS} environment variable
-(and some of the others) refer to terminal ``capabilities,'' the ability
-of a terminal to highlight text, or change its color, and so on.
-These capabilities are stored in an online database and accessed by
-the @code{terminfo} library.
-
-@cindex environment variables
-
-@table @env
-
-@item GREP_COLOR
-@vindex GREP_COLOR @r{environment variable}
-@cindex highlight markers
-This variable specifies the color used to highlight matched (non-empty) text.
-It is deprecated in favor of @env{GREP_COLORS}, but still supported.
-The @samp{mt}, @samp{ms}, and @samp{mc} capabilities of @env{GREP_COLORS}
-have priority over it.
-It can only specify the color used to highlight
-the matching non-empty text in any matching line
-(a selected line when the @option{-v} command-line option is omitted,
-or a context line when @option{-v} is specified).
-The default is @samp{01;31},
-which means a bold red foreground text on the terminal's default background.
-
-@item GREP_COLORS
-@vindex GREP_COLORS @r{environment variable}
-@cindex highlight markers
-This variable specifies the colors and other attributes
-used to highlight various parts of the output.
-Its value is a colon-separated list of @code{terminfo} capabilities
-that defaults to @samp{ms=01;31:mc=01;31:sl=:cx=:fn=35:ln=32:bn=32:se=36}
-with the @samp{rv} and @samp{ne} boolean capabilities omitted (i.e., false).
 Supported capabilities are as follows.
 
 @table @code

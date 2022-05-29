@@ -295,9 +295,6 @@ groups of context lines) with escape sequences to display them in color
 on the terminal.
 The colors are defined by the environment variable
 .BR GREP_COLORS .
-The deprecated environment variable
-.B GREP_COLOR
-is still supported, but its setting does not have priority.
 .I WHEN
 is
 .BR never ", " always ", or " auto .
@@ -1008,31 +1005,6 @@ was not compiled with national language support (NLS).
 The shell command
 .B "locale \-a"
 lists locales that are currently available.
-.TP
-.B GREP_COLOR
-This variable specifies the color used to highlight matched (non-empty) text.
-It is deprecated in favor of
-.BR GREP_COLORS ,
-but still supported.
-The
-.BR mt ,
-.BR ms ,
-and
-.B mc
-capabilities of
-.B GREP_COLORS
-have priority over it.
-It can only specify the color used to highlight
-the matching non-empty text in any matching line
-(a selected line when the
-.B \-v
-command-line option is omitted,
-or a context line when
-.B \-v
-is specified).
-The default is
-.BR 01;31 ,
-which means a bold red foreground text on the terminal's default background.
 .TP
 .B GREP_COLORS
 Specifies the colors and other attributes

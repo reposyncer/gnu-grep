@@ -295,8 +295,7 @@ static const char *group_separator = SEP_STR_GROUP;
          This only leaves red, magenta, green, and cyan (and their bold
          counterparts) and possibly bold blue.  */
 /* The color strings used for matched text.
-   The user can overwrite them using the deprecated
-   environment variable GREP_COLOR or the new GREP_COLORS.  */
+   The user can overwrite them using the GREP_COLORS environment variable.  */
 static const char *selected_match_color = "01;31";	/* bold red */
 static const char *context_match_color  = "01;31";	/* bold red */
 
@@ -2916,6 +2915,12 @@ main (int argc, char **argv)
 
       /* New GREP_COLORS has priority.  */
       parse_grep_colors ();
+
+      /* Warn if GREP_COLOR has an effect, since it's deprecated.  */
+      if (selected_match_color == userval || context_match_color == userval)
+        error (0, 0, _("warning: GREP_COLOR='%s' is deprecated;"
+                       " use GREP_COLORS='mt=%s'"),
+               userval, userval);
     }
 
   initialize_unibyte_mask ();
