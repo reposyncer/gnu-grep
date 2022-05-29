@@ -84,6 +84,7 @@ TESTS =						\
   char-class-multibyte				\
   char-class-multibyte2				\
   context-0					\
+  color-colors					\
   count-newline					\
   dfa-coverage					\
   dfa-heap-overrun				\
