@@ -300,7 +300,7 @@ count non-matching lines.
 @opindex --color
 @opindex --colour
 @cindex highlight, color, colour
-Surround the matched (non-empty) strings, matching lines, context lines,
+Surround matched non-empty strings, matching lines, context lines,
 file names, line numbers, byte offsets, and separators (for fields and
 groups of context lines) with escape sequences to display them in color
 on the terminal.
@@ -308,7 +308,14 @@ The colors are defined by the environment variable @env{GREP_COLORS}
 and default to @samp{ms=01;31:mc=01;31:sl=:cx=:fn=35:ln=32:bn=32:se=36}
 for bold red matched text, magenta file names, green line numbers,
 green byte offsets, cyan separators, and default terminal colors otherwise.
-@var{WHEN} is @samp{never}, @samp{always}, or @samp{auto}.
+@xref{Environment Variables}.
+
+@var{WHEN} is @samp{always} to use colors, @samp{never} to not use
+colors, or @samp{auto} to use colors if standard output is associated
+with a terminal device and the @env{TERM} environment variable's value
+suggests that the terminal supports colors.
+Plain @option{--color} is treated like @option{--color=auto};
+if no @option{--color} option is given, the default is @option{--color=never}.
 
 @item -L
 @itemx --files-without-match
@@ -380,7 +387,7 @@ When the @option{-v} or @option{--invert-match} option is also used,
 @opindex -o
 @opindex --only-matching
 @cindex only matching
-Print only the matched (non-empty) parts of matching lines,
+Print only the matched non-empty parts of matching lines,
 with each such part on a separate output line.
 Output lines use the same delimiters as input, and delimiters are null
 bytes if @option{-z} (@option{--null-data}) is also used (@pxref{Other
@@ -867,7 +874,7 @@ refer to terminal ``capabilities,'' the ability
 of a terminal to highlight text, or change its color, and so on.
 These capabilities are stored in an online database and accessed by
 the @code{terminfo} library.
-Nonempty capability values
+Non-empty capability values
 control highlighting using
 Select Graphic Rendition (SGR)
 commands interpreted by the terminal or terminal emulator.
@@ -1048,6 +1055,11 @@ follow file names must be treated as file names;
 by default,
 such options are permuted to the front of the operand list
 and are treated as options.
+
+@item TERM
+@vindex TERM @r{environment variable}
+This variable specifies the output terminal type, which can affect
+what the @option{--color} option does.  @xref{General Output Control}.
 
 @item _@var{N}_GNU_nonoption_argv_flags_
 @vindex _@var{N}_GNU_nonoption_argv_flags_ @r{environment variable}
