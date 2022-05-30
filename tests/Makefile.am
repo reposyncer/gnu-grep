@@ -83,8 +83,8 @@ TESTS =						\
   case-fold-titlecase				\
   char-class-multibyte				\
   char-class-multibyte2				\
-  context-0					\
   color-colors					\
+  context-0					\
   count-newline					\
   dfa-coverage					\
   dfa-heap-overrun				\
