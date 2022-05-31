@@ -14,6 +14,8 @@ GNU grep NEWS                                    -*- outline -*-
   The confusing GREP_COLOR environment variable is now obsolescent.
   Instead of GREP_COLOR='xxx', use GREP_COLORS='mt=xxx'.  grep now
   warns if GREP_COLOR is used and is not overridden by GREP_COLORS.
+  Also, grep now treates GREP_COLOR like GREP_COLORS by silently
+  ignoring it if it attempts to inject ANSI terminal escapes.
 
   Regular expressions with stray backslashes now cause warnings, as
   their unspecified behavior can lead to unexpected results.

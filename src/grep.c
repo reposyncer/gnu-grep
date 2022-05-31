@@ -2911,7 +2911,12 @@ main (int argc, char **argv)
       /* Legacy.  */
       char *userval = getenv ("GREP_COLOR");
       if (userval != NULL && *userval != '\0')
-        selected_match_color = context_match_color = userval;
+        for (char *q = userval; *q == ';' || c_isdigit (*q); q++)
+          if (!q[1])
+            {
+              selected_match_color = context_match_color = userval;
+              break;
+            }
 
       /* New GREP_COLORS has priority.  */
       parse_grep_colors ();
