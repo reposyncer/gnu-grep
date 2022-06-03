@@ -179,5 +179,5 @@ sc_timeout_prereq:
 	  | xargs grep -lw timeout					\
 	  | xargs grep -FLw require_timeout_				\
 	  | $(GREP) .							\
-	  && { echo '$(ME): timeout withtout use of require_timeout_'	\
+	  && { echo '$(ME): timeout without use of require_timeout_'	\
 	    1>&2; exit 1; } || :

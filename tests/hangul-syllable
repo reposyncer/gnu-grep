@@ -15,7 +15,7 @@ export LC_ALL
 # Check that '.' completely matches $1, i.e., that $1 is a single UTF-8 char.
 check_char ()
 {
-  printf "$1\\n" >in || framewmork_failure_
+  printf "$1\\n" >in || framework_failure_
 
   grep $2 '^.$' in >out || fail=1
   cmp in out || fail=1
@@ -25,7 +25,7 @@ check_char ()
 # $1 contains an encoding error.
 check_nonchar ()
 {
-  printf "$1\\n" >in || framewmork_failure_
+  printf "$1\\n" >in || framework_failure_
 
   grep -a -v '^.*$' in >out || fail=1
   cmp in out || fail=1
