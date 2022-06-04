@@ -1487,6 +1487,12 @@ Match whitespace, it is a synonym for @samp{[[:space:]]}.
 @item \S
 Match non-whitespace, it is a synonym for @samp{[^[:space:]]}.
 
+@item \]
+Match @samp{]}.
+
+@item \@}
+Match @samp{@}}.
+
 @end table
 
 For example, @samp{\brat\b} matches the separate word @samp{rat},
@@ -1641,7 +1647,7 @@ portable scripts should avoid them:
 
 @itemize @bullet
 @item
-Special backslash expressions like @samp{\<} and @samp{\b}.
+Special backslash expressions like @samp{\b}, @samp{\<}, and @samp{\]}.
 @xref{Special Backslash Expressions}.
 
 @item
