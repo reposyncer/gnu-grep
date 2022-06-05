@@ -2848,8 +2848,16 @@ main (int argc, char **argv)
     }
   else if (optind < argc)
     {
+      /* If a command-line regular expression operand starts with '\-',
+         skip the '\'.  This suppresses a stray-backslash warning if a
+         script uses the non-POSIX "grep '\-x'" to avoid treating
+         '-x' as an option.  */
+      char const *pat = argv[optind++];
+      bool skip_bs = (matcher != F_MATCHER_INDEX
+                      && pat[0] == '\\' && pat[1] == '-');
+
       /* Make a copy so that it can be reallocated or freed later.  */
-      pattern_array = keys = xstrdup (argv[optind++]);
+      pattern_array = keys = xstrdup (pat + skip_bs);
       idx_t patlen = strlen (keys);
       keys[patlen] = '\n';
       keycc = update_patterns (keys, 0, patlen + 1, "");
