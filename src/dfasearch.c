@@ -144,26 +144,34 @@ regex_compile (struct dfa_comp *dc, char const *p, idx_t len,
                idx_t pcount, idx_t lineno, reg_syntax_t syntax_bits,
                bool syntax_only)
 {
-  struct re_pattern_buffer pat0;
-  struct re_pattern_buffer *pat = syntax_only ? &pat0 : &dc->patterns[pcount];
-  pat->buffer = NULL;
-  pat->allocated = 0;
+  struct re_pattern_buffer pat;
+  pat.buffer = NULL;
+  pat.allocated = 0;
 
   /* Do not use a fastmap with -i, to work around glibc Bug#20381.  */
   verify (UCHAR_MAX < IDX_MAX);
   idx_t uchar_max = UCHAR_MAX;
-  pat->fastmap = (syntax_only | match_icase) ? NULL : ximalloc (uchar_max + 1);
+  pat.fastmap = syntax_only | match_icase ? NULL : ximalloc (uchar_max + 1);
 
-  pat->translate = NULL;
+  pat.translate = NULL;
 
   if (syntax_only)
     re_set_syntax (syntax_bits | RE_NO_SUB);
   else
     re_set_syntax (syntax_bits);
 
-  char const *err = re_compile_pattern (p, len, pat);
+  char const *err = re_compile_pattern (p, len, &pat);
   if (!err)
-    return true;
+    {
+      if (syntax_only)
+        regfree (&pat);
+      else
+        dc->patterns[pcount] = pat;
+
+      return true;
+    }
+
+  free (pat.fastmap);
 
   /* Emit a filename:lineno: prefix for patterns taken from files.  */
   idx_t pat_lineno;
