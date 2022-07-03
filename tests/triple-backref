@@ -24,6 +24,7 @@ MALLOC_CHECK_=
 warn_ "$ME_: expect malfunction on glibc systems due to" \
    "https://sourceware.org/bugzilla/show_bug.cgi?id=11053"
 
+# While with glibc-2.35, it no longer aborts, the empty result is still wrong:
 timeout 10 grep -E '(.?)(.?)(.?)\3\2\1' in > out || fail=1
 compare out in || fail=1
 
