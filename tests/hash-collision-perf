@@ -44,7 +44,6 @@ large_ms=$(LC_ALL=C user_time_ 1 grep --file=in empty) || fail=1
 # Deliberately recording in an unused variable so it
 # shows up in set -x output, in case this test fails.
 ratio=$(expr "$large_ms" / "$small_ms")
-warn_ ratio=$ratio
 
 # The duration of the latter run must be no more than 10 times
 # that of the former.  Using recent versions prior to this fix,
