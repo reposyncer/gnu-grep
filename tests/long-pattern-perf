@@ -32,8 +32,12 @@ seq 10000 50000 | tr -d '\012' > r || framework_failure_
 cat r r r r r r r r r r > re-10x || framework_failure_
 mv r re || framework_failure_
 
-base_ms=$(user_time_ 1 grep -f re in    ) || fail=1
-b10x_ms=$(user_time_ 1 grep -f re-10x in) || fail=1
+returns_ 0 user_time_ 1 grep -f re in > base-ms \
+    || framework_failure_ 'failed to compute baseline timing'
+base_ms=$(cat base-ms)
+returns_ 0 user_time_ 1 grep -f re-10x in > b10x-ms \
+    || framework_failure_ 'failed to compute 10x timing'
+b10x_ms=$(cat b10x-ms)
 
 # Increasing the length of the regular expression by a factor
 # of 10 should cause no more than a 10x increase in duration.
