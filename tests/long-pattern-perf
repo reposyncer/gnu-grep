@@ -35,6 +35,16 @@ mv r re || framework_failure_
 returns_ 0 user_time_ 1 grep -f re in > base-ms \
     || framework_failure_ 'failed to compute baseline timing'
 base_ms=$(cat base-ms)
+
+# This test caused trouble on at least two types of fringe hosts: those
+# with very little memory (a 1.5GB RAM Solaris host) and a Linux/s390x
+# (emulated with qemu-system-s390x). The former became unusable due to
+# mem requirements of the 2nd test, and the latter ended up taking >35x
+# more time than the base case. Skipping this test for any system using
+# more than this many milliseconds for the first case should avoid those
+# false-postitive failures while skipping the test on few other systems.
+test 800 -lt "$base_ms" && skip_ "this base-case test took too long"
+
 returns_ 0 user_time_ 1 grep -f re-10x in > b10x-ms \
     || framework_failure_ 'failed to compute 10x timing'
 b10x_ms=$(cat b10x-ms)
