@@ -2105,9 +2105,9 @@ What happened to @command{egrep} and @command{fgrep}?
 that were the counterparts of the modern @samp{grep -E} and @samp{grep -F}.
 Although breaking up @command{grep} into three programs was perhaps
 useful on the small computers of the 1970s, @command{egrep} and
-@command{fgrep} were not standardized by POSIX and are no longer needed.
-In the current GNU implementation, @command{egrep} and @command{fgrep}
-issue a warning and then act like their modern counterparts;
+@command{fgrep} were deemed obsolescent by POSIX in 1992,
+removed from POSIX in 2001, deprecated by GNU Grep 2.5.3 in 2007,
+and changed to issue obsolescence warnings by GNU Grep 3.8 in 2022;
 eventually, they are planned to be removed entirely.
 
 If you prefer the old names, you can use use your own substitutes,
