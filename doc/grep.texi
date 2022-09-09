@@ -864,8 +864,7 @@ overridden by @env{GREP_COLORS}.  Instead of
 @item GREP_COLORS
 @vindex GREP_COLORS @r{environment variable}
 @cindex highlight markers
-This variable specifies the colors and other attributes
-used to highlight various parts of the output.
+This variable controls how the @option{--color} option highlights output.
 Its value is a colon-separated list of @code{terminfo} capabilities
 that defaults to @samp{ms=01;31:mc=01;31:sl=:cx=:fn=35:ln=32:bn=32:se=36}
 with the @samp{rv} and @samp{ne} boolean capabilities omitted (i.e., false).
