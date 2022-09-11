@@ -20,7 +20,6 @@
 #ifndef GREP_GREP_H
 #define GREP_GREP_H 1
 
-#include <stdbool.h>
 #include <idx.h>
 
 /* The following flags are exported from grep for the matchers

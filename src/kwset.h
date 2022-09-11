@@ -20,7 +20,6 @@
 /* Written August 1989 by Mike Haertel.  */
 
 #include <stddef.h>
-#include <stdbool.h>
 
 #include <idx.h>
 
