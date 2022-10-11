@@ -17,8 +17,10 @@
    02110-1301, USA.  */
 
 #include <config.h>
+
 #include "search.h"
 #include "die.h"
+#include "intprops.h"
 
 #define PCRE2_CODE_UNIT_WIDTH 8
 #include <pcre2.h>
