@@ -27,10 +27,11 @@
 
 #include "kwset.h"
 
+#include <stdckdint.h>
 #include <stdint.h>
 #include <sys/types.h>
+
 #include "system.h"
-#include "intprops.h"
 #include "memchr2.h"
 #include "obstack.h"
 #include "xalloc.h"
@@ -674,7 +675,7 @@ bmexec_trans (kwset_t kwset, char const *text, idx_t size)
 
   /* Significance of 12: 1 (initial offset) + 10 (skip loop) + 1 (md2).  */
   idx_t len12;
-  if (INT_MULTIPLY_OK (len, 12, &len12) && len12 < size)
+  if (!ckd_mul (&len12, len, 12) && len12 < size)
     /* 11 is not a bug, the initial offset happens only once.  */
     for (ep = text + size - 11 * len; tp <= ep; )
       {

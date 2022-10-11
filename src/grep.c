@@ -24,6 +24,7 @@
 #include <wchar.h>
 #include <inttypes.h>
 #include <stdarg.h>
+#include <stdckdint.h>
 #include <stdint.h>
 #include <stdio.h>
 #include "system.h"
@@ -898,7 +899,7 @@ static intmax_t
 add_count (intmax_t a, idx_t b)
 {
   intmax_t sum;
-  if (!INT_ADD_OK (a, b, &sum))
+  if (ckd_add (&sum, a, b))
     die (EXIT_TROUBLE, 0, _("input is too large to count"));
   return sum;
 }
@@ -982,7 +983,7 @@ fillbuf (idx_t save, struct stat const *st)
               off_t to_be_read = st->st_size - bufoffset;
               ptrdiff_t a;
               if (0 <= to_be_read
-                  && INT_ADD_OK (to_be_read, save + min_after_buflim, &a))
+                  && !ckd_add (&a, to_be_read, save + min_after_buflim))
                 alloc_max = MAX (a, bufalloc + incr_min);
             }
 

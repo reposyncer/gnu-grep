@@ -20,7 +20,8 @@
 
 #include "search.h"
 #include "die.h"
-#include "intprops.h"
+
+#include <stdckdint.h>
 
 #define PCRE2_CODE_UNIT_WIDTH 8
 #include <pcre2.h>
@@ -106,7 +107,7 @@ jit_exec (struct pcre_comp *pc, char const *subject, idx_t search_bytes,
         {
           uint32_t lim;
           pcre2_config (PCRE2_CONFIG_DEPTHLIMIT, &lim);
-          if (INT_MULTIPLY_WRAPV (lim, 2, &lim))
+          if (ckd_mul (&lim, lim, 2))
             return e;
           if (!pc->mcontext)
             pc->mcontext = pcre2_match_context_create (pc->gcontext);
