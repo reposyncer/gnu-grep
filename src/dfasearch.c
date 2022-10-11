@@ -149,7 +149,7 @@ regex_compile (struct dfa_comp *dc, char const *p, idx_t len,
   pat.allocated = 0;
 
   /* Do not use a fastmap with -i, to work around glibc Bug#20381.  */
-  verify (UCHAR_MAX < IDX_MAX);
+  static_assert (UCHAR_MAX < IDX_MAX);
   idx_t uchar_max = UCHAR_MAX;
   pat.fastmap = (syntax_only | match_icase) ? NULL : ximalloc (uchar_max + 1);
 
