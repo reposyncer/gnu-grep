@@ -281,20 +281,19 @@ GEAcompile (char *pattern, idx_t size, reg_syntax_t syntax_bits,
   if (compilation_failed)
     exit (EXIT_TROUBLE);
 
-  if (prev <= patlim)
+  if (patlim < prev)
+    buflen--;
+  else if (pattern < prev)
     {
-      if (pattern < prev)
-        {
-          idx_t prevlen = patlim - prev;
-          buf = xirealloc (buf, buflen + prevlen);
-          memcpy (buf + buflen, prev, prevlen);
-          buflen += prevlen;
-        }
-      else
-        {
-          buf = pattern;
-          buflen = size;
-        }
+      idx_t prevlen = patlim - prev;
+      buf = xirealloc (buf, buflen + prevlen);
+      memcpy (buf + buflen, prev, prevlen);
+      buflen += prevlen;
+    }
+  else
+    {
+      buf = pattern;
+      buflen = size;
     }
 
   /* In the match_words and match_lines cases, we use a different pattern

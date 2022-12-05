@@ -43,4 +43,12 @@ if test $? -ne 2 ; then
         failures=1
 fi
 
+# https://bugs.gnu.org/36148#13
+echo 'Total failed: 2 (1 ignored)' |
+    grep -e '^Total failed: 0$' -e '^Total failed: \([0-9]*\) (\1 ignored)$'
+if test $? -ne 1 ; then
+        echo "Backref: Multiple -e test, test #5 failed"
+        failures=1
+fi
+
 Exit $failures
