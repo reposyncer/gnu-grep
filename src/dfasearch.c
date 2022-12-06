@@ -261,8 +261,6 @@ GEAcompile (char *pattern, idx_t size, reg_syntax_t syntax_bits,
           dc->patterns++;
         }
 
-      re_set_syntax (syntax_bits);
-
       if (!regex_compile (dc, p, len, dc->pcount, lineno, syntax_bits,
                           !backref))
         compilation_failed = true;
