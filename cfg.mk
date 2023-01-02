@@ -1,5 +1,5 @@
 # Customize maint.mk                           -*- makefile -*-
-# Copyright (C) 2009-2022 Free Software Foundation, Inc.
+# Copyright (C) 2009-2023 Free Software Foundation, Inc.
 
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -31,7 +31,8 @@ url_dir_list = https://ftp.gnu.org/gnu/$(PACKAGE)
 # Tests not to run as part of "make distcheck".
 local-checks-to-skip =			\
   sc_indent				\
-  sc_texinfo_acronym
+  sc_texinfo_acronym			\
+  sc_unportable_grep_q
 
 # Tools used to bootstrap this package, used for "announcement".
 bootstrap-tools = autoconf,automake,gnulib
