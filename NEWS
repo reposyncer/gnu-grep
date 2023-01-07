@@ -4,6 +4,12 @@ GNU grep NEWS                                    -*- outline -*-
 
 ** Bug fixes
 
+  With -P, some non-ASCII UTF8 characters were not recognized as
+  word-constituent due to our omission of the PCRE2_UCP flag. E.g.,
+  given f(){ echo Perú|LC_ALL=en_US.UTF-8 grep -Po "$1"; } and
+  this command, echo $(f 'r\w'):$(f '.\b'), before it would print ":r".
+  After the fix, it prints the correct results: "rú:ú".
+
   When given multiple patterns the last of which has a back-reference,
   grep no longer sometimes mistakenly matches lines in some cases.
   [Bug#36148#13 introduced in grep 3.4]

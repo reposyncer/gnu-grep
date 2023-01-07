@@ -147,6 +147,7 @@ TESTS =						\
   pcre-jitstack					\
   pcre-o					\
   pcre-utf8					\
+  pcre-utf8-w					\
   pcre-w					\
   pcre-wx-backref				\
   pcre-z					\

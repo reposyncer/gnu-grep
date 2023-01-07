@@ -149,7 +149,7 @@ Pcompile (char *pattern, idx_t size, reg_syntax_t ignored, bool exact)
     {
       if (! localeinfo.using_utf8)
         die (EXIT_TROUBLE, 0, _("-P supports only unibyte and UTF-8 locales"));
-      flags |= PCRE2_UTF;
+      flags |= (PCRE2_UTF | PCRE2_UCP);
 #if 0
       /* Do not match individual code units but only UTF-8.  */
       flags |= PCRE2_NEVER_BACKSLASH_C;
