@@ -14,7 +14,7 @@ LC_ALL=en_US.UTF-8 require_pcre_
 fail=0
 
 echo '$' | LC_ALL=en_US.UTF-8 grep -qP '\p{S}' \
-  || skip_ 'PCRE support is compiled out, or it does not support properties'
+  || skip_ 'PCRE unicode support is compiled out'
 
 euro='\342\202\254 euro'
 printf "$euro\\n" > in || framework_failure_

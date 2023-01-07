@@ -145,7 +145,9 @@ Pcompile (char *pattern, idx_t size, reg_syntax_t ignored, bool exact)
     = pcre2_general_context_create (private_malloc, private_free, NULL);
   pcre2_compile_context *ccontext = pcre2_compile_context_create (gcontext);
 
-  if (localeinfo.multibyte)
+  uint32_t unicode = 1;
+  pcre2_config (PCRE2_CONFIG_UNICODE, &unicode);
+  if (unicode && localeinfo.multibyte)
     {
       if (! localeinfo.using_utf8)
         die (EXIT_TROUBLE, 0, _("-P supports only unibyte and UTF-8 locales"));
