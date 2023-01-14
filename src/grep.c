@@ -1436,7 +1436,7 @@ prtext (char *beg, char *lim)
 /* Replace all NUL bytes in buffer P (which ends at LIM) with EOL.
    This avoids running out of memory when binary input contains a long
    sequence of zeros, which would otherwise be considered to be part
-   of a long line.  P[LIM] should be EOL.  */
+   of a long line.  *LIM should be EOL.  */
 static void
 zap_nuls (char *p, char *lim, char eol)
 {
@@ -1584,7 +1584,7 @@ grep (int fd, struct stat const *st, bool *ineof)
          the buffer, 0 means there is no incomplete last line).  */
       oldc = beg[-1];
       beg[-1] = eol;
-      /* FIXME: use rawmemrchr if/when it exists, since we have ensured
+      /* If rawmemrchr existed it could be used here, since we have ensured
          that this use of memrchr is guaranteed never to return NULL.  */
       lim = memrchr (beg - 1, eol, buflim - beg + 1);
       ++lim;
