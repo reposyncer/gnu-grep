@@ -168,7 +168,7 @@ do
 done
 
 # Try a unibyte test with ISO 8859-7, if available.
-if test "$(get-mb-cur-max el_GR.iso88597)" -eq 1; then
+if test "$(get-mb-cur-max el_GR.iso88597)" = 1; then
   LC_ALL=el_GR.iso88597
   export LC_ALL
 
