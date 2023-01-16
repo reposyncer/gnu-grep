@@ -1,5 +1,6 @@
 #!/bin/sh
-# Ensure non-ASCII UTF-8 characters are correctly identified as word-consituent
+# Ensure non-ASCII UTF-8 characters are correctly identified as
+# word-constituents
 #
 # Copyright (C) 2023 Free Software Foundation, Inc.
 #

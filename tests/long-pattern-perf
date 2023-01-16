@@ -42,7 +42,7 @@ base_ms=$(cat base-ms)
 # mem requirements of the 2nd test, and the latter ended up taking >35x
 # more time than the base case. Skipping this test for any system using
 # more than this many milliseconds for the first case should avoid those
-# false-postitive failures while skipping the test on few other systems.
+# false-positive failures while skipping the test on few other systems.
 test 800 -lt "$base_ms" && skip_ "this base-case test took too long"
 
 returns_ 0 user_time_ 1 grep -f re-10x in > b10x-ms \
