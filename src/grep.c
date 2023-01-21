@@ -41,7 +41,6 @@
 #include "fcntl-safer.h"
 #include "fts_.h"
 #include "getopt.h"
-#include "getprogname.h"
 #include "grep.h"
 #include "hash.h"
 #include "intprops.h"
