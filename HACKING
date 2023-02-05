@@ -12,7 +12,7 @@ Use the latest upstream sources
 Base any changes you make on the latest upstream sources.
 You can get a copy of the latest with this command:
 
-    git clone git://git.sv.gnu.org/grep
+    git clone https://git.savannah.gnu.org/git/grep
 
 That downloads the entire repository, including revision control history.
 Once downloaded, you can get incremental updates by running one of
@@ -83,7 +83,7 @@ Make your changes on a private "topic" branch
 =============================================
 So you checked out grep like this:
 
-  git clone git://git.sv.gnu.org/grep
+  git clone https://git.savannah.gnu.org/git/grep
 
 Now, cd into the grep/ directory and run:
 

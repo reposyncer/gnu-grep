@@ -2829,7 +2829,7 @@ main (int argc, char **argv)
       version_etc (stdout, getprogname (), PACKAGE_NAME, VERSION,
                    (char *) NULL);
       puts (_("Written by Mike Haertel and others; see\n"
-              "<https://git.sv.gnu.org/cgit/grep.git/tree/AUTHORS>."));
+              "<https://git.savannah.gnu.org/cgit/grep.git/tree/AUTHORS>."));
       return EXIT_SUCCESS;
     }
 
