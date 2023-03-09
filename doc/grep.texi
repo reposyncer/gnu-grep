@@ -1060,18 +1060,6 @@ and are treated as options.
 This variable specifies the output terminal type, which can affect
 what the @option{--color} option does.  @xref{General Output Control}.
 
-@item _@var{N}_GNU_nonoption_argv_flags_
-@vindex _@var{N}_GNU_nonoption_argv_flags_ @r{environment variable}
-(Here @code{@var{N}} is @command{grep}'s numeric process ID.)
-If the @var{i}th character of this environment variable's value is @samp{1},
-do not consider the @var{i}th operand of @command{grep} to be an option,
-even if it appears to be one.
-A shell can put this variable in the environment for each command it runs,
-specifying which operands are the results of file name wildcard expansion
-and therefore should not be treated as options.
-This behavior is available only with the GNU C library,
-and only when @env{POSIXLY_CORRECT} is not set.
-
 @end table
 
 The @env{GREP_OPTIONS} environment variable of @command{grep} 2.20 and
