@@ -2,6 +2,16 @@ GNU grep NEWS                                    -*- outline -*-
 
 * Noteworthy changes in release ?.? (????-??-??) [?]
 
+** Bug fixes
+
+  With -P, \d now matches only ASCII digits, regardless of PCRE
+  options/modes. The changes in grep-3.9 to make \b and \w work
+  properly had the undesirable side effect of making \d also match
+  e.g., the Arabic digits: ٠١٢٣٤٥٦٧٨٩.  With grep-3.9, -P '\d+'
+  would match that ten-digit (20-byte) string. Now, to match such
+  a digit, you would use \p{Nd}.
+  [bug introduced in grep 3.9]
+
 
 * Noteworthy changes in release 3.9 (2023-03-05) [stable]
 

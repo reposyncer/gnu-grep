@@ -1,0 +1,31 @@
+#!/bin/sh
+# Ensure that grep -P's \d matches only the 10 ASCII digits.
+# With, grep-3.9, \d would match e.g., the multibyte Arabic digits.
+#
+# Copyright (C) 2023 Free Software Foundation, Inc.
+#
+# Copying and distribution of this file, with or without modification,
+# are permitted in any medium without royalty provided the copyright
+# notice and this notice are preserved.
+
+. "${srcdir=.}/init.sh"; path_prepend_ ../src
+require_en_utf8_locale_
+LC_ALL=en_US.UTF-8
+export LC_ALL
+require_pcre_
+
+echo . | grep -qP '(*UTF).' 2>/dev/null \
+  || skip_ 'PCRE unicode support is compiled out'
+
+fail=0
+
+# $ printf %s ٠١٢٣٤٥٦٧٨٩|od -An -to1 -w10 |sed 's/ /\\/g'; : arabic digits
+# \331\240\331\241\331\242\331\243\331\244
+# \331\245\331\246\331\247\331\250\331\251
+printf '\331\240\331\241\331\242\331\243\331\244' > in || framework_failure_
+printf '\331\245\331\246\331\247\331\250\331\251' >> in || framework_failure_
+
+grep -P '\d+' in > out && fail=1
+compare /dev/null out || fail=1
+
+Exit $fail

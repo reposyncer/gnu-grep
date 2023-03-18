@@ -1141,6 +1141,37 @@ combined with the @option{-z} (@option{--null-data}) option, and note that
 @samp{grep@ -P} may warn of unimplemented features.
 @xref{Other Options}.
 
+For documentation, refer to @url{https://www.pcre.org/}, with these caveats:
+@itemize
+@item
+@samp{\d} always matches only the ten ASCII digits, regardless of locale or
+in-regexp directives like @samp{(?aD)}.
+Use @samp{\p@{Nd@}} if you require to match non-ASCII digits.
+Once pcre2 support for @samp{(?aD)} is widespread enough,
+we expect to make that the default, so it will be overridable.
+@c Using pcre2 git commit pcre2-10.40-112-g6277357, this demonstrates how
+@c we'll prefix with (?aD) to make \d's ASCII-only behavior the default:
+@c $ LC_ALL=en_US.UTF-8 ./pcre2grep -u '(?aD)^\d+' <<< '٠١٢٣٤٥٦٧٨٩'
+@c [Exit 1]
+@c $ LC_ALL=en_US.UTF-8 ./pcre2grep -u '^\d+' <<< '٠١٢٣٤٥٦٧٨٩'
+@c ٠١٢٣٤٥٦٧٨٩
+
+@item
+By default, @command{grep} applies each regexp to a line at a time,
+so the @samp{(?s)} directive (making @samp{.} match line breaks)
+is generally ineffective.
+However, with @option{-z} (@option{--null-data}) it can work:
+@example
+$ printf 'a\nb\n' |grep -zP '(?s)a.b'
+a
+b
+@end example
+But beware: with the @option{-z} (@option{--null-data}) and a file
+containing no NUL byte, grep must read the entire file into memory
+before processing any of it.
+Thus, it will exhaust memory and fail for some large files.
+@end itemize
+
 @end table
 
 

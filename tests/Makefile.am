@@ -139,6 +139,7 @@ TESTS =						\
   options					\
   pcre						\
   pcre-abort					\
+  pcre-ascii-digits				\
   pcre-context					\
   pcre-count					\
   pcre-infloop					\

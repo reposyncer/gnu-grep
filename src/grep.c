@@ -2089,7 +2089,8 @@ static struct
 #endif
 };
 /* Keep these in sync with the 'matchers' table.  */
-enum { E_MATCHER_INDEX = 1, F_MATCHER_INDEX = 2, G_MATCHER_INDEX = 0 };
+enum { E_MATCHER_INDEX = 1, F_MATCHER_INDEX = 2, G_MATCHER_INDEX = 0,
+       P_MATCHER_INDEX = 6 };
 
 /* Return the index of the matcher corresponding to M if available.
    MATCHER is the index of the previous matcher, or -1 if none.
@@ -2372,6 +2373,80 @@ fgrep_to_grep_pattern (char **keys_p, idx_t *len_p)
         }
     }
 
+  *p = '\n';
+  free (*keys_p);
+  *keys_p = new_keys;
+  *len_p = p - new_keys;
+}
+
+/* Replace each \d in *KEYS_P with [0-9], to ensure that \d matches only ASCII
+   digits.  Now that we enable PCRE2_UCP for pcre regexps, \d would otherwise
+   match non-ASCII digits in some locales.  Use \p{Nd} if you require to match
+   those.  */
+static void
+pcre_pattern_expand_backslash_d (char **keys_p, idx_t *len_p)
+{
+  idx_t len = *len_p;
+  char *keys = *keys_p;
+  mbstate_t mb_state = { 0 };
+  char *new_keys = xnmalloc (len / 2 + 1, 5);
+  char *p = new_keys;
+  bool prev_backslash = false;
+
+  for (ptrdiff_t n; len; keys += n, len -= n)
+    {
+      n = mb_clen (keys, len, &mb_state);
+      switch (n)
+        {
+        case -2:
+          n = len;
+          FALLTHROUGH;
+        default:
+          if (prev_backslash)
+            {
+              prev_backslash = false;
+              *p++ = '\\';
+            }
+          p = mempcpy (p, keys, n);
+          break;
+
+        case -1:
+          if (prev_backslash)
+            {
+              prev_backslash = false;
+              *p++ = '\\';
+            }
+          memset (&mb_state, 0, sizeof mb_state);
+          n = 1;
+          FALLTHROUGH;
+        case 1:
+          if (prev_backslash)
+            {
+              prev_backslash = false;
+              switch (*keys)
+                {
+                case 'd':
+                  p = mempcpy (p, "[0-9]", 5);
+                  break;
+                default:
+                  *p++ = '\\';
+                  *p++ = *keys;
+                  break;
+                }
+            }
+          else
+            {
+              if (*keys == '\\')
+                prev_backslash = true;
+              else
+                *p++ = *keys;
+            }
+          break;
+        }
+    }
+
+  if (prev_backslash)
+    *p++ = '\\';
   *p = '\n';
   free (*keys_p);
   *keys_p = new_keys;
@@ -2969,6 +3044,11 @@ main (int argc, char **argv)
       else if (1 < n_patterns)
         matcher = try_fgrep_pattern (matcher, keys, &keycc);
     }
+
+  /* If -P, replace each \d with [0-9].
+     Those who want to match non-ASCII digits must use \p{Nd}.  */
+  if (matcher == P_MATCHER_INDEX)
+    pcre_pattern_expand_backslash_d (&keys, &keycc);
 
   execute = matchers[matcher].execute;
   compiled_pattern =
