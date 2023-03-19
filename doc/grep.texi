@@ -1157,6 +1157,12 @@ we expect to make that the default, so it will be overridable.
 @c ٠١٢٣٤٥٦٧٨٩
 
 @item
+Although PCRE tracks the syntax and semantics of Perl's regular
+expressions, the match is not always exact, partly because Perl
+evolves and a Perl installation may predate or postdate the PCRE2
+installation on the same host.
+
+@item
 By default, @command{grep} applies each regexp to a line at a time,
 so the @samp{(?s)} directive (making @samp{.} match line breaks)
 is generally ineffective.
