@@ -1144,13 +1144,17 @@ combined with the @option{-z} (@option{--null-data}) option, and note that
 For documentation, refer to @url{https://www.pcre.org/}, with these caveats:
 @itemize
 @item
-@samp{\d} always matches only the ten ASCII digits, regardless of locale or
-in-regexp directives like @samp{(?aD)}.
-Use @samp{\p@{Nd@}} if you require to match non-ASCII digits.
-Once pcre2 support for @samp{(?aD)} is widespread enough,
-we expect to make that the default, so it will be overridable.
-@c Using pcre2 git commit pcre2-10.40-112-g6277357, this demonstrates how
-@c we'll prefix with (?aD) to make \d's ASCII-only behavior the default:
+@samp{\d} matches only the ten ASCII digits, regardless of locale.
+Use @samp{\p@{Nd@}} to also match non-ASCII digits.
+
+When @command{grep} is built with PCRE2 10.42 and earlier, @samp{\d}
+ignores in-regexp directives like @samp{(?aD)} and matches only ASCII
+digits regardless of these directives.  However, later versions of
+PCRE2 likely will fix this, and the plan is for @command{grep} to
+respect those directives if possible.
+@c Using PCRE2 git commit pcre2-10.40-112-g6277357, this demonstrates
+@c the equivalent of how grep could use PCRE2_EXTRA_ASCII_BSD to make \d's
+@c ASCII-only behavior the default:
 @c $ LC_ALL=en_US.UTF-8 ./pcre2grep -u '(?aD)^\d+' <<< '٠١٢٣٤٥٦٧٨٩'
 @c [Exit 1]
 @c $ LC_ALL=en_US.UTF-8 ./pcre2grep -u '^\d+' <<< '٠١٢٣٤٥٦٧٨٩'

@@ -35,6 +35,9 @@
 # define PCRE2_ERROR_DEPTHLIMIT PCRE2_ERROR_RECURSIONLIMIT
 # define pcre2_set_depth_limit pcre2_set_recursion_limit
 #endif
+#ifndef PCRE2_EXTRA_ASCII_BSD
+# define PCRE2_EXTRA_ASCII_BSD 0
+#endif
 
 struct pcre_comp
 {
@@ -130,12 +133,89 @@ bad_utf8_from_pcre2 (int e)
 #endif
 }
 
+/* Replace each \d in *KEYS_P with [0-9], to ensure that \d matches only ASCII
+   digits.  Now that we enable PCRE2_UCP for pcre regexps, \d would otherwise
+   match non-ASCII digits in some locales.  Use \p{Nd} if you require to match
+   those.  */
+static void
+pcre_pattern_expand_backslash_d (char **keys_p, idx_t *len_p)
+{
+  idx_t len = *len_p;
+  char *keys = *keys_p;
+  mbstate_t mb_state = { 0 };
+  char *new_keys = xnmalloc (len / 2 + 1, 5);
+  char *p = new_keys;
+  bool prev_backslash = false;
+
+  for (ptrdiff_t n; len; keys += n, len -= n)
+    {
+      n = mb_clen (keys, len, &mb_state);
+      switch (n)
+        {
+        case -2:
+          n = len;
+          FALLTHROUGH;
+        default:
+          if (prev_backslash)
+            {
+              prev_backslash = false;
+              *p++ = '\\';
+            }
+          p = mempcpy (p, keys, n);
+          break;
+
+        case -1:
+          if (prev_backslash)
+            {
+              prev_backslash = false;
+              *p++ = '\\';
+            }
+          memset (&mb_state, 0, sizeof mb_state);
+          n = 1;
+          FALLTHROUGH;
+        case 1:
+          if (prev_backslash)
+            {
+              prev_backslash = false;
+              switch (*keys)
+                {
+                case 'd':
+                  p = mempcpy (p, "[0-9]", 5);
+                  break;
+                default:
+                  *p++ = '\\';
+                  *p++ = *keys;
+                  break;
+                }
+            }
+          else
+            {
+              if (*keys == '\\')
+                prev_backslash = true;
+              else
+                *p++ = *keys;
+            }
+          break;
+        }
+    }
+
+  if (prev_backslash)
+    *p++ = '\\';
+  *p = '\n';
+  free (*keys_p);
+  *keys_p = new_keys;
+  *len_p = p - new_keys;
+}
+
 /* Compile the -P style PATTERN, containing SIZE bytes that are
    followed by '\n'.  Return a description of the compiled pattern.  */
 
 void *
 Pcompile (char *pattern, idx_t size, reg_syntax_t ignored, bool exact)
 {
+  if (! PCRE2_EXTRA_ASCII_BSD)
+    pcre_pattern_expand_backslash_d (&pattern, &size);
+
   PCRE2_SIZE e;
   int ec;
   int flags = PCRE2_DOLLAR_ENDONLY | (match_icase ? PCRE2_CASELESS : 0);
@@ -168,12 +248,16 @@ Pcompile (char *pattern, idx_t size, reg_syntax_t ignored, bool exact)
   if (rawmemchr (pattern, '\n') != patlim)
     die (EXIT_TROUBLE, 0, _("the -P option only supports a single pattern"));
 
+#ifdef PCRE2_EXTRA_MATCH_LINE
+  uint32_t extra_options = (PCRE2_EXTRA_ASCII_BSD
+                            | (match_lines ? PCRE2_EXTRA_MATCH_LINE : 0));
+  pcre2_set_compile_extra_options (ccontext, extra_options);
+#endif
+
   void *re_storage = NULL;
   if (match_lines)
     {
-#ifdef PCRE2_EXTRA_MATCH_LINE
-      pcre2_set_compile_extra_options (ccontext, PCRE2_EXTRA_MATCH_LINE);
-#else
+#ifndef PCRE2_EXTRA_MATCH_LINE
       static char const /* These sizes omit trailing NUL.  */
         xprefix[4] = "^(?:", xsuffix[2] = ")$";
       idx_t re_size = size + sizeof xprefix + sizeof xsuffix;
