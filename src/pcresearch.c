@@ -133,10 +133,13 @@ bad_utf8_from_pcre2 (int e)
 #endif
 }
 
+#if ! PCRE2_EXTRA_ASCII_BSD
 /* Replace each \d in *KEYS_P with [0-9], to ensure that \d matches only ASCII
    digits.  Now that we enable PCRE2_UCP for pcre regexps, \d would otherwise
    match non-ASCII digits in some locales.  Use \p{Nd} if you require to match
-   those.  */
+   those.  Similarly, replace each \D with [^0-9].
+   FIXME: remove in 2025, or whenever we no longer accommodate pcre2-10.42
+   and prior.  */
 static void
 pcre_pattern_expand_backslash_d (char **keys_p, idx_t *len_p)
 {
@@ -182,6 +185,9 @@ pcre_pattern_expand_backslash_d (char **keys_p, idx_t *len_p)
                 case 'd':
                   p = mempcpy (p, "[0-9]", 5);
                   break;
+                case 'D':
+                  p = mempcpy (p, "[^0-9]", 6);
+                  break;
                 default:
                   *p++ = '\\';
                   *p++ = *keys;
@@ -206,6 +212,7 @@ pcre_pattern_expand_backslash_d (char **keys_p, idx_t *len_p)
   *keys_p = new_keys;
   *len_p = p - new_keys;
 }
+#endif
 
 /* Compile the -P style PATTERN, containing SIZE bytes that are
    followed by '\n'.  Return a description of the compiled pattern.  */
@@ -213,8 +220,9 @@ pcre_pattern_expand_backslash_d (char **keys_p, idx_t *len_p)
 void *
 Pcompile (char *pattern, idx_t size, reg_syntax_t ignored, bool exact)
 {
-  if (! PCRE2_EXTRA_ASCII_BSD)
-    pcre_pattern_expand_backslash_d (&pattern, &size);
+#if ! PCRE2_EXTRA_ASCII_BSD
+  pcre_pattern_expand_backslash_d (&pattern, &size);
+#endif
 
   PCRE2_SIZE e;
   int ec;

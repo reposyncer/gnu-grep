@@ -1,6 +1,7 @@
 #!/bin/sh
 # Ensure that grep -P's \d matches only the 10 ASCII digits.
 # With, grep-3.9, \d would match e.g., the multibyte Arabic digits.
+# The same applied to \D.
 #
 # Copyright (C) 2023 Free Software Foundation, Inc.
 #
@@ -24,8 +25,38 @@ fail=0
 # \331\245\331\246\331\247\331\250\331\251
 printf '\331\240\331\241\331\242\331\243\331\244' > in || framework_failure_
 printf '\331\245\331\246\331\247\331\250\331\251' >> in || framework_failure_
+printf '\n' >> in || framework_failure_
 
-grep -P '\d+' in > out && fail=1
+# Ensure that \d matches no character.
+returns_ 1 grep -P '\d' in > out || fail=1
 compare /dev/null out || fail=1
+
+# Ensure that ^\D+$ matches the entire line.
+grep -P '^\D+$' in > out || fail=1
+compare in out || fail=1
+
+# When built with PCRE2 10.43 and newer, one may use (?aD) and (?-aD)
+# to toggle between modes.  (?aD) is the default (making \d == [0-9]).
+# (?-aD) relaxes \d, making it match "all" digits.
+# Use mixed digits as input: Arabic 0 and ASCII 4: ٠4
+printf '\331\2404\n' > in2 || framework_failure_
+
+returns_ 1 grep -P '\d\d' in2 > out || fail=1
+compare /dev/null out || fail=1
+
+# The following tests work only when built with 10.43 or newer,
+# with which, grep accepts the mode-setting '(?aD)':
+if echo 0 | grep -qP '(?aD)\d'; then
+
+  grep -P '(?-aD)\d(?aD)\d' in2 > out || fail=1
+  compare in2 out || fail=1
+
+  returns_ 1 grep -P '\d(?-aD)\d' in2 > out || fail=1
+  compare /dev/null out || fail=1
+
+else
+  warn_ 'skipped some tests: use PCRE2 10.43 or newer to enable' \
+    'support for e.g., (?aD) and (?-aD)'
+fi
 
 Exit $fail

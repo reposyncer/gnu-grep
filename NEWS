@@ -9,7 +9,7 @@ GNU grep NEWS                                    -*- outline -*-
   properly had the undesirable side effect of making \d also match
   e.g., the Arabic digits: ٠١٢٣٤٥٦٧٨٩.  With grep-3.9, -P '\d+'
   would match that ten-digit (20-byte) string. Now, to match such
-  a digit, you would use \p{Nd}.
+  a digit, you would use \p{Nd}. Similarly, \D is now mapped to [^0-9].
   [bug introduced in grep 3.9]
 
 
