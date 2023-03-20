@@ -1190,12 +1190,13 @@ by using various operators to combine smaller expressions.
 three different versions of regular expression syntax:
 basic (BRE), extended (ERE), and Perl-compatible (PCRE).
 In GNU @command{grep},
-there is no difference in available functionality between basic and
-extended syntax.
-In other implementations, basic regular expressions are less powerful.
+basic and extended regular expressions are merely different notations
+for the same pattern-matching functionality.
+In other implementations, basic regular expressions are ordinarily
+less powerful than extended, though occasionally it is the other way around.
 The following description applies to extended regular expressions;
 differences for basic regular expressions are summarized afterwards.
-Perl-compatible regular expressions give additional functionality, and
+Perl-compatible regular expressions have different functionality, and
 are documented in the @i{pcre2syntax}(3) and @i{pcre2pattern}(3) manual
 pages, but work only if PCRE is available in the system.
 

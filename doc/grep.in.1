@@ -715,12 +715,12 @@ This can cause a performance penalty.
 .BR \-U ", " \-\^\-binary
 Treat the file(s) as binary.
 By default, under MS-DOS and MS-Windows,
-.BR grep
+.B grep
 guesses whether a file is text or binary as described for the
 .B \-\^\-binary\-files
 option.
 If
-.BR grep
+.B grep
 decides the file is a text file, it strips the CR characters from the
 original file contents (to make regular expressions with
 .B ^
@@ -756,13 +756,14 @@ expressions, by using various operators to combine smaller expressions.
 understands three different versions of regular expression syntax:
 \*(lqbasic\*(rq (BRE), \*(lqextended\*(rq (ERE) and \*(lqperl\*(rq (PCRE).
 In GNU
-.B grep
-there is no difference in available functionality between basic and
-extended syntax.
-In other implementations, basic regular expressions are less powerful.
+.BR grep ,
+basic and extended regular expressions are merely different notations
+for the same pattern-matching functionality.
+In other implementations, basic regular expressions are ordinarily
+less powerful than extended, though occasionally it is the other way around.
 The following description applies to extended regular expressions;
 differences for basic regular expressions are summarized afterwards.
-Perl-compatible regular expressions give additional functionality, and are
+Perl-compatible regular expressions have different functionality, and are
 documented in
 .BR pcre2syntax (3)
 and
