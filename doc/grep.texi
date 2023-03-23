@@ -223,7 +223,13 @@ this unusual character matches ``S'' or ``s'' even though uppercasing
 it yields ``S''.  Another example: the lowercase German letter ``ß''
 (U+00DF, LATIN SMALL LETTER SHARP S) is normally capitalized as the
 two-character string ``SS'' but it does not match ``SS'', and it might
-not match the uppercase letter ``ẞ'' (U+1E9E, LATIN CAPITAL LETTER
+not match the uppercase letter
+@c texinfo version 2023-03-04.12 complains about the following, saying
+@c "Character missing, sorry: LONG S."  For now, omit it if tex.
+@ifnottex
+``ẞ''
+@end ifnottex
+(U+1E9E, LATIN CAPITAL LETTER
 SHARP S) even though lowercasing the latter yields the former.
 
 @option{-y} is an obsolete synonym that is provided for compatibility.
