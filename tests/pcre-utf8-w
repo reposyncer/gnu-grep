@@ -16,6 +16,8 @@ require_pcre_
 
 echo . | grep -qP '(*UTF).' 2>/dev/null \
   || skip_ 'PCRE unicode support is compiled out'
+echo 0 | grep -qP '(?aD)\d' \
+  || skip_ 'PCRE 10.42 and older lack PCRE2_EXTRA_ASCII_BSD'
 
 fail=0
 

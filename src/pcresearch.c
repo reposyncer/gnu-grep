@@ -133,97 +133,12 @@ bad_utf8_from_pcre2 (int e)
 #endif
 }
 
-#if ! PCRE2_EXTRA_ASCII_BSD
-/* Replace each \d in *KEYS_P with [0-9], to ensure that \d matches only ASCII
-   digits.  Now that we enable PCRE2_UCP for pcre regexps, \d would otherwise
-   match non-ASCII digits in some locales.  Use \p{Nd} if you require to match
-   those.  Similarly, replace each \D with [^0-9].
-   FIXME: remove in 2025, or whenever we no longer accommodate pcre2-10.42
-   and prior.  */
-static void
-pcre_pattern_expand_backslash_d (char **keys_p, idx_t *len_p)
-{
-  idx_t len = *len_p;
-  char *keys = *keys_p;
-  mbstate_t mb_state = { 0 };
-  char *new_keys = xnmalloc (len / 2 + 1, 5);
-  char *p = new_keys;
-  bool prev_backslash = false;
-
-  for (ptrdiff_t n; len; keys += n, len -= n)
-    {
-      n = mb_clen (keys, len, &mb_state);
-      switch (n)
-        {
-        case -2:
-          n = len;
-          FALLTHROUGH;
-        default:
-          if (prev_backslash)
-            {
-              prev_backslash = false;
-              *p++ = '\\';
-            }
-          p = mempcpy (p, keys, n);
-          break;
-
-        case -1:
-          if (prev_backslash)
-            {
-              prev_backslash = false;
-              *p++ = '\\';
-            }
-          memset (&mb_state, 0, sizeof mb_state);
-          n = 1;
-          FALLTHROUGH;
-        case 1:
-          if (prev_backslash)
-            {
-              prev_backslash = false;
-              switch (*keys)
-                {
-                case 'd':
-                  p = mempcpy (p, "[0-9]", 5);
-                  break;
-                case 'D':
-                  p = mempcpy (p, "[^0-9]", 6);
-                  break;
-                default:
-                  *p++ = '\\';
-                  *p++ = *keys;
-                  break;
-                }
-            }
-          else
-            {
-              if (*keys == '\\')
-                prev_backslash = true;
-              else
-                *p++ = *keys;
-            }
-          break;
-        }
-    }
-
-  if (prev_backslash)
-    *p++ = '\\';
-  *p = '\n';
-  free (*keys_p);
-  *keys_p = new_keys;
-  *len_p = p - new_keys;
-}
-#endif
-
 /* Compile the -P style PATTERN, containing SIZE bytes that are
    followed by '\n'.  Return a description of the compiled pattern.  */
 
 void *
 Pcompile (char *pattern, idx_t size, reg_syntax_t ignored, bool exact)
 {
-#if ! PCRE2_EXTRA_ASCII_BSD
-  pcre_pattern_expand_backslash_d (&pattern, &size);
-#endif
-
   PCRE2_SIZE e;
   int ec;
   int flags = PCRE2_DOLLAR_ENDONLY | (match_icase ? PCRE2_CASELESS : 0);
@@ -241,7 +156,17 @@ Pcompile (char *pattern, idx_t size, reg_syntax_t ignored, bool exact)
              _("-P supports only unibyte locales on this platform"));
       if (! localeinfo.using_utf8)
         die (EXIT_TROUBLE, 0, _("-P supports only unibyte and UTF-8 locales"));
-      flags |= (PCRE2_UTF | PCRE2_UCP);
+
+      flags |= PCRE2_UTF;
+
+      /* If PCRE2_EXTRA_ASCII_BSD is available, use PCRE2_UCP
+         so that \d does not have the undesirable effect of matching
+         non-ASCII digits.  Otherwise (i.e., with PCRE2 10.42 and earlier),
+         escapes like \w have only their ASCII interpretations,
+         but that's better than the confusion that would ensue if \d
+         matched non-ASCII digits.  */
+      flags |= PCRE2_EXTRA_ASCII_BSD ? PCRE2_UCP : 0;
+
 #if 0
       /* Do not match individual code units but only UTF-8.  */
       flags |= PCRE2_NEVER_BACKSLASH_C;

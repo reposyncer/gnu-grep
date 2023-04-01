@@ -17,6 +17,8 @@ require_pcre_
 
 echo . | grep -qP '(*UTF).' 2>/dev/null \
   || skip_ 'PCRE unicode support is compiled out'
+echo 0 | grep -qP '(?aD)\d' \
+  || skip_ 'PCRE 10.42 and older lack PCRE2_EXTRA_ASCII_BSD'
 
 fail=0
 
@@ -44,19 +46,10 @@ printf '\331\2404\n' > in2 || framework_failure_
 returns_ 1 grep -P '\d\d' in2 > out || fail=1
 compare /dev/null out || fail=1
 
-# The following tests work only when built with 10.43 or newer,
-# with which, grep accepts the mode-setting '(?aD)':
-if echo 0 | grep -qP '(?aD)\d'; then
+grep -P '(?-aD)\d(?aD)\d' in2 > out || fail=1
+compare in2 out || fail=1
 
-  grep -P '(?-aD)\d(?aD)\d' in2 > out || fail=1
-  compare in2 out || fail=1
-
-  returns_ 1 grep -P '\d(?-aD)\d' in2 > out || fail=1
-  compare /dev/null out || fail=1
-
-else
-  warn_ 'skipped some tests: use PCRE2 10.43 or newer to enable' \
-    'support for e.g., (?aD) and (?-aD)'
-fi
+returns_ 1 grep -P '\d(?-aD)\d' in2 > out || fail=1
+compare /dev/null out || fail=1
 
 Exit $fail
