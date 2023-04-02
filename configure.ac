@@ -212,6 +212,7 @@ dnl then the installer should configure --with-included-regex.
 AM_CONDITIONAL([USE_INCLUDED_REGEX], [test "$ac_use_included_regex" = yes])
 if test "$ac_use_included_regex" = no; then
   AC_MSG_WARN([Included lib/regex.c not used])
+  AC_DEFINE([USE_INCLUDED_REGEX], 1, [building with included regex code])
 fi
 
 gl_FUNC_PCRE

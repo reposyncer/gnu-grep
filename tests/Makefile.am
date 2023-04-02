@@ -46,13 +46,19 @@ LDADD = ../lib/libgreputils.a $(LIBINTL) ../lib/libgreputils.a
 # The triple-backref test is expected to fail with both the system
 # matcher (i.e., with glibc) and with the included matcher.
 # Both matchers need to be fixed.
-# FIXME-2015: Remove this once the glibc and gnulib bugs are fixed.
+# FIXME-2025: Remove this once the glibc and gnulib bugs are fixed.
 XFAIL_TESTS = triple-backref
+
+# The glibc-infloop test is expected to fail with both the system
+# matcher (i.e., with glibc) and with the included matcher.
+# Both matchers need to be fixed.
+# FIXME-2025: Remove this once the glibc and gnulib bugs are fixed.
+XFAIL_TESTS += glibc-infloop
 
 # Equivalence classes are only supported when using the system
 # matcher (which means only with glibc).
 # The included matcher needs to be fixed.
-# FIXME-2015: Remove this once the gnulib bug is fixed.
+# FIXME-2025: Remove this once the gnulib bug is fixed.
 if USE_INCLUDED_REGEX
 XFAIL_TESTS += equiv-classes
 else
@@ -108,6 +114,7 @@ TESTS =						\
   fillbuf-long-line				\
   fmbtest					\
   foad1						\
+  glibc-infloop					\
   grep-dev-null					\
   grep-dev-null-out				\
   grep-dir					\
