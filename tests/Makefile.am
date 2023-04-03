@@ -183,6 +183,7 @@ TESTS =						\
   word-multi-file				\
   word-multibyte				\
   write-error-msg				\
+  y2038-vs-32-bit				\
   yesno						\
   z-anchor-newline
 
