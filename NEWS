@@ -10,6 +10,10 @@ GNU grep NEWS                                    -*- outline -*-
   grep 3.8, in that patterns like \w and \b use ASCII rather than
   Unicode interpretations.
 
+  grep no longer fails on files dated after the year 2038,
+  when running on 32-bit x86 and ARM hosts using glibc 2.34+.
+  [bug introduced in grep 3.9]
+
 
 * Noteworthy changes in release 3.10 (2023-03-22) [stable]
 
