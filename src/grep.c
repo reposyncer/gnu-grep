@@ -29,6 +29,11 @@
 #include <stdio.h>
 #include "system.h"
 
+#if HAVE_LIBPCRE
+# define PCRE2_CODE_UNIT_WIDTH 8
+# include <pcre2.h>
+#endif
+
 #include "argmatch.h"
 #include "c-ctype.h"
 #include "c-stack.h"
@@ -2830,6 +2835,12 @@ main (int argc, char **argv)
                    (char *) NULL);
       puts (_("Written by Mike Haertel and others; see\n"
               "<https://git.savannah.gnu.org/cgit/grep.git/tree/AUTHORS>."));
+#if HAVE_LIBPCRE
+      unsigned char buf[128];
+      (void) pcre2_config (PCRE2_CONFIG_VERSION, buf);
+      fputs (_("\nBuilt with PCRE "), stdout);
+      puts ((char *) buf);
+#endif
       return EXIT_SUCCESS;
     }
 

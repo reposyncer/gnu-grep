@@ -14,6 +14,14 @@ GNU grep NEWS                                    -*- outline -*-
   when running on 32-bit x86 and ARM hosts using glibc 2.34+.
   [bug introduced in grep 3.9]
 
+** Changes in behavior
+
+  grep --version now prints a line describing the version of PCRE2 it uses.
+  For example, it prints this when built with the very latest from git:
+    Built with PCRE 10.43-DEV 2023-01-15
+  or this with what's currently available in Fedora 37:
+    Built with PCRE 10.40 2022-04-14
+
 
 * Noteworthy changes in release 3.10 (2023-03-22) [stable]
 
