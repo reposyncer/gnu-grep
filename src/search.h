@@ -65,6 +65,7 @@ extern ptrdiff_t Fexecute (void *, char const *, idx_t, idx_t *, char const *);
 /* pcresearch.c */
 extern void *Pcompile (char *, idx_t, reg_syntax_t, bool);
 extern ptrdiff_t Pexecute (void *, char const *, idx_t, idx_t *, char const *);
+extern void Pprint_version (void);
 
 /* grep.c */
 extern struct localeinfo localeinfo;

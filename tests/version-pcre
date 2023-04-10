@@ -12,4 +12,4 @@
 grep -q '^#define HAVE_LIBPCRE 1' "$CONFIG_HEADER" \
   || skip_ 'built without PCRE support'
 
-grep --version | grep -qP '^Built with PCRE [\d.]+'
+grep --version | grep -qP '^grep -P uses PCRE2 [\d.]+'

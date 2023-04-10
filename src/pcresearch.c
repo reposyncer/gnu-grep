@@ -74,6 +74,15 @@ private_free (void *ptr, _GL_UNUSED void *unused)
   free (ptr);
 }
 
+void
+Pprint_version (void)
+{
+  char buf[128];
+  if (sizeof buf <= pcre2_config (PCRE2_CONFIG_VERSION, buf))
+    abort ();
+  printf (_("\ngrep -P uses PCRE2 %s\n"), buf);
+}
+
 /* Match the already-compiled PCRE pattern against the data in SUBJECT,
    of size SEARCH_BYTES and starting with offset SEARCH_OFFSET, with
    options OPTIONS.
