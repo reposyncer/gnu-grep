@@ -243,9 +243,9 @@ Pcompile (char *pattern, idx_t size, reg_syntax_t ignored, bool exact)
   pc->mcontext = NULL;
   pc->data = pcre2_match_data_create_from_pattern (pc->cre, gcontext);
 
-  ec = pcre2_jit_compile (pc->cre, PCRE2_JIT_COMPLETE);
-  if (ec && ec != PCRE2_ERROR_JIT_BADOPTION && ec != PCRE2_ERROR_NOMEMORY)
-    die (EXIT_TROUBLE, 0, _("JIT internal error: %d"), ec);
+  /* Ignore any failure return from pcre2_jit_compile, as that merely
+     means JIT won't be used during matching.  */
+  pcre2_jit_compile (pc->cre, PCRE2_JIT_COMPLETE);
 
   /* The PCRE documentation says that a 32 KiB stack is the default.  */
   pc->jit_stack = NULL;
