@@ -9,6 +9,7 @@ GNU grep NEWS                                    -*- outline -*-
   With PCRE2 version 10.42 or earlier, behavior reverts to that of
   grep 3.8, in that patterns like \w and \b use ASCII rather than
   Unicode interpretations.
+  [bug introduced in grep 3.10]
 
   grep no longer fails on files dated after the year 2038,
   when running on 32-bit x86 and ARM hosts using glibc 2.34+.
