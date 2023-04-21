@@ -39,6 +39,15 @@
 # define PCRE2_EXTRA_ASCII_BSD 0
 #endif
 
+/* Use PCRE2_MATCH_INVALID_UTF if supported and not buggy;
+   see <https://github.com/PCRE2Project/pcre2/issues/224>.
+   Assume the bug will be fixed after PCRE2 10.42.  */
+#if defined PCRE2_MATCH_INVALID_UTF && 10 < PCRE2_MAJOR + (42 < PCRE2_MINOR)
+enum { MATCH_INVALID_UTF = PCRE2_MATCH_INVALID_UTF };
+#else
+enum { MATCH_INVALID_UTF = 0 };
+#endif
+
 struct pcre_comp
 {
   /* General context for PCRE operations.  */
@@ -130,16 +139,11 @@ jit_exec (struct pcre_comp *pc, char const *subject, idx_t search_bytes,
     }
 }
 
-/* Return true if E is an error code for bad UTF-8, and if pcre2_match
-   could return E because PCRE lacks PCRE2_MATCH_INVALID_UTF.  */
+/* Return true if E is an error code for bad UTF-8.  */
 static bool
 bad_utf8_from_pcre2 (int e)
 {
-#ifdef PCRE2_MATCH_INVALID_UTF
-  return false;
-#else
   return PCRE2_ERROR_UTF8_ERR21 <= e && e <= PCRE2_ERROR_UTF8_ERR1;
-#endif
 }
 
 /* Compile the -P style PATTERN, containing SIZE bytes that are
@@ -168,6 +172,9 @@ Pcompile (char *pattern, idx_t size, reg_syntax_t ignored, bool exact)
 
       flags |= PCRE2_UTF;
 
+      /* If supported, consider invalid UTF-8 as a barrier not an error.  */
+      flags |= MATCH_INVALID_UTF;
+
       /* If PCRE2_EXTRA_ASCII_BSD is available, use PCRE2_UCP
          so that \d does not have the undesirable effect of matching
          non-ASCII digits.  Otherwise (i.e., with PCRE2 10.42 and earlier),
@@ -179,10 +186,6 @@ Pcompile (char *pattern, idx_t size, reg_syntax_t ignored, bool exact)
 #if 0
       /* Do not match individual code units but only UTF-8.  */
       flags |= PCRE2_NEVER_BACKSLASH_C;
-#endif
-#ifdef PCRE2_MATCH_INVALID_UTF
-      /* Consider invalid UTF-8 as a barrier, instead of error.  */
-      flags |= PCRE2_MATCH_INVALID_UTF;
 #endif
     }
 
@@ -226,7 +229,9 @@ Pcompile (char *pattern, idx_t size, reg_syntax_t ignored, bool exact)
       size = re_size;
     }
 
-  pcre2_set_character_tables (ccontext, pcre2_maketables (gcontext));
+  if (!localeinfo.multibyte)
+    pcre2_set_character_tables (ccontext, pcre2_maketables (gcontext));
+
   pc->cre = pcre2_compile ((PCRE2_SPTR) pattern, size, flags,
                            &ec, &e, ccontext);
   if (!pc->cre)
@@ -313,7 +318,7 @@ Pexecute (void *vcp, char const *buf, idx_t size, idx_t *match_size,
 
           e = jit_exec (pc, subject, line_end - subject,
                         search_offset, options);
-          if (!bad_utf8_from_pcre2 (e))
+          if (MATCH_INVALID_UTF || !bad_utf8_from_pcre2 (e))
             break;
 
           idx_t valid_bytes = pcre2_get_startchar (pc->data);
