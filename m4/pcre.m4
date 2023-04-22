@@ -21,7 +21,10 @@ AC_DEFUN([gl_FUNC_PCRE],
   use_pcre=no
 
   if test $test_pcre != no; then
-    PKG_CHECK_MODULES([PCRE], [libpcre2-8], [], [: ${PCRE_LIBS=-lpcre2-8}])
+
+    if test -z "$PCRE_CFLAGS" && test -z "$PCRE_LIBS"; then
+      PKG_CHECK_MODULES([PCRE], [libpcre2-8], [], [: ${PCRE_LIBS=-lpcre2-8}])
+    fi
 
     AC_CACHE_CHECK([for pcre2_compile], [pcre_cv_have_pcre2_compile],
       [pcre_saved_CFLAGS=$CFLAGS

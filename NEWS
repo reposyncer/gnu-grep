@@ -19,10 +19,13 @@ GNU grep NEWS                                    -*- outline -*-
 
   grep --version now prints a line describing the version of PCRE2 it uses.
   For example, it prints this when built with the very latest from git:
-    grep -P uses PCRE2 10.43-DEV 2023-01-15
+    grep -P uses PCRE2 10.43-DEV 2023-04-14
   or this with what's currently available in Fedora 37:
     grep -P uses PCRE2 10.40 2022-04-14
 
+  previous versions of grep wouldn't respect the user provided settings for
+  PCRE_CFLAGS and PCRE_LIBS when building if a libpcre2-8 pkg-config module
+  found in the system.
 
 * Noteworthy changes in release 3.10 (2023-03-22) [stable]
 
