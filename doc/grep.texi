@@ -202,6 +202,7 @@ in a shell command.
 Obtain patterns from @var{file}, one per line.
 If this option is used multiple times or is combined with the
 @option{-e} (@option{--regexp}) option, search for all patterns given.
+When @var{file} is @samp{-}, read patterns from standard input.
 The empty file contains zero patterns, and therefore matches nothing.
 (@option{-f} is specified by POSIX.)
 
