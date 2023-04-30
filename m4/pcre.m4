@@ -22,7 +22,7 @@ AC_DEFUN([gl_FUNC_PCRE],
 
   if test $test_pcre != no; then
 
-    if test -z "$PCRE_CFLAGS" && test -z "$PCRE_LIBS"; then
+    if test -z "${PCRE_CFLAGS+set}" && test -z "${PCRE_LIBS+set}"; then
       PKG_CHECK_MODULES([PCRE], [libpcre2-8], [], [: ${PCRE_LIBS=-lpcre2-8}])
     fi
 
