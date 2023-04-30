@@ -1154,18 +1154,15 @@ For documentation, refer to @url{https://www.pcre.org/}, with these caveats:
 @samp{\d} matches only the ten ASCII digits
 (and @samp{\D} matches the complement), regardless of locale.
 Use @samp{\p@{Nd@}} to also match non-ASCII digits.
-
-When @command{grep} is built with PCRE2 10.42 and earlier,
-@samp{\d} and @samp{\D} ignore in-regexp directives like @samp{(?aD)}
-and work like @samp{[0-9]} and @samp{[^0-9]} respectively.
-However, later versions of PCRE2 likely will fix this,
-and the plan is for @command{grep} to respect those directives if possible.
+(The behavior of @samp{\d} and @samp{\D} is unspecified after
+in-regexp directives like @samp{(?aD)}.)
 
 @item
 Although PCRE tracks the syntax and semantics of Perl's regular
-expressions, the match is not always exact, partly because Perl
+expressions, the match is not always exact.  For example, Perl
 evolves and a Perl installation may predate or postdate the PCRE2
-installation on the same host.
+installation on the same host, or their Unicode versions may differ,
+or Perl and PCRE2 may disagree about an obscure construct.
 
 @item
 By default, @command{grep} applies each regexp to a line at a time,

@@ -4,11 +4,12 @@ GNU grep NEWS                                    -*- outline -*-
 
 ** Bug fixes
 
-  With -P, patterns like [\d] now work again.  The fix relies on PCRE2
-  support for the PCRE2_EXTRA_ASCII_BSD flag planned for PCRE2 10.43.
-  With PCRE2 version 10.42 or earlier, behavior reverts to that of
-  grep 3.8, in that patterns like \w and \b use ASCII rather than
-  Unicode interpretations.
+  With -P, patterns like [\d] now work again.  Fixing this has caused
+  grep to revert to the behavior of grep 3.8, in that patterns like \w
+  and \b go back to using ASCII rather than Unicode interpretations.
+  However, future versions of GNU grep and/or PCRE2 are likely to fix
+  this and change the behavior of \w and \b back to Unicode again,
+  without breaking [\d] as 3.10 did.
   [bug introduced in grep 3.10]
 
   grep no longer fails on files dated after the year 2038,
@@ -25,7 +26,8 @@ GNU grep NEWS                                    -*- outline -*-
 
   previous versions of grep wouldn't respect the user provided settings for
   PCRE_CFLAGS and PCRE_LIBS when building if a libpcre2-8 pkg-config module
-  found in the system.
+  was found.
+
 
 * Noteworthy changes in release 3.10 (2023-03-22) [stable]
 
