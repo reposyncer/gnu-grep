@@ -2137,7 +2137,7 @@ removed from POSIX in 2001, deprecated by GNU Grep 2.5.3 in 2007,
 and changed to issue obsolescence warnings by GNU Grep 3.8 in 2022;
 eventually, they are planned to be removed entirely.
 
-If you prefer the old names, you can use use your own substitutes,
+If you prefer the old names, you can use your own substitutes,
 such as a shell script named @command{egrep} with the following
 contents:
 

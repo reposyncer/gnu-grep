@@ -1407,7 +1407,7 @@
         is put in different compiled structure patterns[]. The patterns
         are given to dfacomp() and kwsmusts() as is.
         (Ecompile): Likewised.
-        (Fcompile): Reverse to the old behaviour of compiling the enire
+        (Fcompile): Reverse to the old behaviour of compiling the entire
         patterns in one shot.
         (EGexecute): If falling to GNU regex for the matching, loop in the
         array of compile patterns[] to find a match.
@@ -1457,7 +1457,7 @@
         (xrealloc): Removed using lib/xmalloc.c.
         (xmalloc): Removed using lib/xmalloc.c
         (main): Register with atexit() to check for error on stdout.
-        * configure.in: Check for atexit(), call jm_MALLOC, jm_RELLOC and
+        * configure.in: Check for atexit(), call jm_MALLOC, jm_REALLOC and
         jm_PREREQ_ERROR.
         * tests/bre.awk: Removed the hack to drain the buffer since we
         always fclose(stdout) atexit.
@@ -1541,7 +1541,7 @@
         * src/exclude.h: New file.
         * src/grep.c (main): Took the GNU tar code to handle
         the option --include, --exclude, --exclude-from.
-        Files are check for a match, with exlude_filename ().
+        Files are check for a match, with exclude_filename ().
         New option --exclude-from.
         * src/savedir.c: Call exclude_filename() to check for
         file pattern exclusion or inclusion.
@@ -1592,7 +1592,7 @@
 
         * m4/dosfile.m4 (AC_DOSFILE): Move AC_DEFINEs out of AC_CACHE_CHECK.
 
-2001-02-17  Alain Malgoire
+2001-02-17  Alain Magloire
 
         * doc/grep.texi: Document the new options and the new behaviour
         back-references are local.  Use excerpt from Karl Berry regex
@@ -1699,8 +1699,8 @@
         (color): Rename color variable to color_option.
         Removed 'always|never|auto' arguments, not necessary for grep.
         (exclude_pattern): new variable, holder for the file pattern.
-        (include_pattern): new variable, hoder for the file pattern.
-        * src/savedir.c: Signature change, take two new argmuments.
+        (include_pattern): new variable, holder for the file pattern.
+        * src/savedir.c: Signature change, take two new arguments.
         * doc/grep.texi: Document, new options.
         * doc/grep.man: Document, new options.
 
@@ -1712,7 +1712,7 @@
 
 2001-02-09  Alain Magloire
 
-        Patch from Ulrich Drepper to provide hilighting.
+        Patch from Ulrich Drepper to provide highlighting.
 
         * src/grep.c: New option --color.
         (color): New static var.
@@ -1722,7 +1722,7 @@
         to find the offset of the matching string.
         * src/savedir.c: Take advantage of _DIRENT_HAVE_TYPE if supported.
         * src/search.c (EGexecute, Fexecute, Pexecute): Take a new argument
-        when doing exact match for the color hiligting.
+        when doing exact match for the color highlighting.
 
 2000-09-01  Brian Youmans
 
@@ -1792,7 +1792,7 @@
 
 2000-06-02  Paul Eggert
 
-        Problen noted by Gerald Stoller <gerald_stoller@hotmail.com>
+        Problem noted by Gerald Stoller <gerald_stoller@hotmail.com>
 
         * src/grep.c (main): POSIX says that -q overrides -l, which
         in turn overrides the other output options.  Fix grep to
@@ -2208,7 +2208,7 @@
         on pre-OpenVMS 7.x systems; general overhaul.
         * src/getpagesize.h: Reinstate support for different pagesizes on
         VAX and Alpha. Work around problem with DEC C compiler.
-        * src/vms_fab.c: Cast to some assigments; fixed typo argcp vs. argp.
+        * src/vms_fab.c: Cast to some assignments; fixed typo argcp vs. argp.
         * src/vms_fab.h: Added new include files to avoid warnings about
         undefined function prototypes.
         Those patches were provided by Martin P.J. Zinser (zinser@decus.de).
@@ -2670,7 +2670,7 @@
 
 1999-03-16 Volker Borchert
 
-        * configure.in: Use case case ... esac for  checking Visual C++.
+        * configure.in: Use case ... esac for  checking Visual C++.
         When ${CC} contains options it was not recognize.
 
 1999-03-07 Paul Eggert
@@ -2764,7 +2764,7 @@
 
 1999-02-10 Alain Magloire
 
-        * bootstrap/{Makefile{try,am},REAMDE} : skeleton
+        * bootstrap/{Makefile{try,am},README} : skeleton
         provided for system lacking the tools to autoconfigure.
 
         * src/{e,f,}grepmat.c: added guard [HAVE_CONFIG_H]
@@ -2858,7 +2858,7 @@
         * doc/Makefile.am djgpp/Makefile.am m4/Makefile.am vms/Makefile.am:
         New files.
 
-        * m4/progtest.m4: proctect '[]' from m4.
+        * m4/progtest.m4: protect '[]' from m4.
         Noted by Eli Z.
 
         * PATCHES-AC: New file, add the patch for autoconf in the dist.
@@ -3333,7 +3333,7 @@
         Suggested by Harald Hanche-Olsen.
 
         * src/grep.c (main): '-f /dev/null' now specifies no patterns
-        and therfore matches nothing.
+        and therefore matches nothing.
         Reported by Jorge Stolfi.
         Patched by Paul Eggert.
 
@@ -3368,7 +3368,7 @@
         * src/grep.c: reverse back to greping directories,
         One could skip the error message by defining
         SKIP_DIR_ERROR. There is no clear way of doing
-        things, I hope to setle this on the next majore release
+        things, I hope to settle this on the next major release
         Thanks Paul Eggert, Eli Zaretskii and gnits for the
         exchange.
 
@@ -3427,7 +3427,7 @@
         (setmatcher) [HAVE_SETRLIMIT]: Set re_max_failures so that the
         matcher won't ever overflow the stack.
         (main) [__MSDOS__, _WIN32]: Handle backslashes and drive letters
-        in argv[0], remove the .exe suffix, and downcase the prgram name.
+        in argv[0], remove the .exe suffix, and downcase the program name.
         [O_BINARY]: Pass additional DOS-specific options to getopt_long
         and handle them.  Call stat before attempting to open the file, in
         case it is a directory (DOS will fail the open call for
@@ -3497,7 +3497,7 @@
         regex package. Change the way the tests were done to be more
         conformant to automake.
 
-        * configure.in: added --disable-regex for folks with their own fuctions.
+        * configure.in: added --disable-regex for folks with their own functions.
 
         * grep-20d : available for testing
 
@@ -3551,7 +3551,7 @@
 
         * check.sh, scriptgen.awk: fix grep paths.
 
-        * change the directory strucure: grep is now in src to comply with
+        * change the directory structure: grep is now in src to comply with
         gettext.m4.
 
         * grep.c version.c [VERSION]: got rid of version.c,
