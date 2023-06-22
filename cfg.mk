@@ -45,6 +45,9 @@ announcement_Cc_ = $(translation_project_), $(PACKAGE)-devel@gnu.org
 _gl_TS_unmarked_extern_functions = \
   main usage mb_clen to_uchar dfaerror dfawarn imbrlen
 
+# Add an exemption for sc_makefile_at_at_check.
+_makefile_at_at_check_exceptions = ' && !/MAKEINFO/'
+
 # Now that we have better tests, make this the default.
 export VERBOSE = yes
 
