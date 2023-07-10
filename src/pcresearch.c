@@ -86,10 +86,10 @@ private_free (void *ptr, _GL_UNUSED void *unused)
 void
 Pprint_version (void)
 {
-  char buf[128];
-  if (sizeof buf <= pcre2_config (PCRE2_CONFIG_VERSION, buf))
-    abort ();
+  char *buf = ximalloc (pcre2_config (PCRE2_CONFIG_VERSION, NULL));
+  pcre2_config (PCRE2_CONFIG_VERSION, buf);
   printf (_("\ngrep -P uses PCRE2 %s\n"), buf);
+  free (buf);
 }
 
 /* Match the already-compiled PCRE pattern against the data in SUBJECT,
