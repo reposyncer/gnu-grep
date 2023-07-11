@@ -24,7 +24,6 @@
 #include <sys/types.h>
 #include <stdint.h>
 #include <wchar.h>
-#include <wctype.h>
 #include <regex.h>
 
 #include "system.h"

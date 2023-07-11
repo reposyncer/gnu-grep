@@ -1,6 +1,12 @@
 GNU grep NEWS                                    -*- outline -*-
 
 * Noteworthy changes in release ?.? (????-??-??) [?]
+  On Windows platforms and on AIX in 32-bit mode, grep now supports
+
+** Changes in behavior
+
+  On Windows platforms and on AIX in 32-bit mode, grep now supports
+  Unicode characters outside the Basic Multilingual Plane.
 
 
 * Noteworthy changes in release 3.11 (2023-05-13) [stable]

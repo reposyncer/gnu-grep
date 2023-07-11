@@ -22,6 +22,8 @@
 #define SYSTEM_INLINE _GL_EXTERN_INLINE
 #include "search.h"
 
+#include <uchar.h>
+
 /* For each byte B, sbwordchar[B] is true if B is a single-byte
    character that is a word constituent, and is false otherwise.  */
 static bool sbwordchar[NCHAR];
@@ -30,7 +32,7 @@ static bool sbwordchar[NCHAR];
 static bool
 wordchar (wint_t wc)
 {
-  return wc == L'_' || iswalnum (wc);
+  return wc == L'_' || c32isalnum (wc);
 }
 
 void
@@ -173,8 +175,8 @@ wordchars_count (char const *buf, char const *end, bool countall)
         break;
       else
         {
-          wchar_t wc = 0;
-          size_t wcbytes = mbrtowc (&wc, buf + n, end - buf - n, &mbs);
+          char32_t wc = 0;
+          size_t wcbytes = mbrtoc32 (&wc, buf + n, end - buf - n, &mbs);
           if (!wordchar (wc))
             break;
           n += wcbytes + !wcbytes;
