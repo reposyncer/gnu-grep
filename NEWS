@@ -1,7 +1,6 @@
 GNU grep NEWS                                    -*- outline -*-
 
 * Noteworthy changes in release ?.? (????-??-??) [?]
-  On Windows platforms and on AIX in 32-bit mode, grep now supports
 
 ** Changes in behavior
 
