@@ -2261,7 +2261,7 @@ setup_ok_fold (void)
         continue;
 
       int ok = 1;
-      wchar_t folded[CASE_FOLDED_BUFSIZE];
+      char32_t folded[CASE_FOLDED_BUFSIZE];
       for (int n = case_folded_counterparts (wi, folded); 0 <= --n; )
         {
           char buf[MB_LEN_MAX];
@@ -2301,7 +2301,7 @@ fgrep_icase_charlen (char const *pat, idx_t patlen, mbstate_t *mbs)
   /* PAT starts with a multibyte character.  Fcompile works if the
      character has no case folded counterparts and toupper translates
      none of its encoding's bytes.  */
-  wchar_t folded[CASE_FOLDED_BUFSIZE];
+  char32_t folded[CASE_FOLDED_BUFSIZE];
   if (case_folded_counterparts (wc, folded))
     return -1;
   for (idx_t i = wn; 0 < --i; )
