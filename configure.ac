@@ -59,8 +59,6 @@ PKG_PROG_PKG_CONFIG([0.9.0])
 gl_cv_func_mbrtowc_empty_input='assume yes'
 
 dnl Checks for typedefs, structures, and compiler characteristics.
-AC_TYPE_SIZE_T
-AC_C_CONST
 gl_INIT
 
 # Ensure VLAs are not used.
@@ -193,13 +191,7 @@ AC_DEFINE([ARGMATCH_DIE], [usage (EXIT_FAILURE)],
 AC_DEFINE([ARGMATCH_DIE_DECL], [void usage (int _e)],
           [Define to the declaration of the xargmatch failure function.])
 
-dnl Checks for header files.
-AC_HEADER_DIRENT
-
-dnl Checks for functions.
-AC_FUNC_CLOSEDIR_VOID
-
-AC_CHECK_FUNCS_ONCE([isascii setlocale])
+AC_CHECK_FUNCS_ONCE([setlocale])
 
 dnl I18N feature
 AM_GNU_GETTEXT_VERSION([0.18.2])
