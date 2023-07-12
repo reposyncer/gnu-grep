@@ -43,6 +43,8 @@ noinst_HEADERS = grep.h kwset.h search.h system.h
 # replacement functions defined in libgreputils.a.
 LDADD = \
   ../lib/libgreputils.a $(LIBINTL) ../lib/libgreputils.a $(LIBICONV) \
+  $(HARD_LOCALE_LIB) $(LIBC32CONV) \
+  $(LIBSIGSEGV) $(LIBUNISTRING) $(MBRTOWC_LIB) $(SETLOCALE_NULL_LIB) \
   $(LIBTHREAD)
 
 grep_LDADD = $(LDADD) $(PCRE_LIBS) $(LIBCSTACK)
