@@ -2,6 +2,15 @@ GNU grep NEWS                                    -*- outline -*-
 
 * Noteworthy changes in release ?.? (????-??-??) [?]
 
+** Bug fixes
+
+  Searching a directory with at least 100,000 entries no longer fails
+  with "Operation not supported" and exit status 2. Now, this prints 1
+  and no diagnostic, as expected:
+    $ mkdir t && cd t && seq 100000|xargs touch && grep -r x .; echo $?
+    1
+  [bug introduced in grep 3.11]
+
 ** Changes in behavior
 
   On Windows platforms and on AIX in 32-bit mode, grep now supports
