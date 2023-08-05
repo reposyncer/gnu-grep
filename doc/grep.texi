@@ -555,7 +555,7 @@ Print @var{num} lines of leading and trailing output context.
 @opindex --group-separator
 @cindex group separator
 When @option{-A}, @option{-B} or @option{-C} are in use,
-print @var{string} instead of @option{--} between groups of lines.
+print @var{string} instead of @samp{--} between groups of lines.
 
 @item --no-group-separator
 @opindex --group-separator
@@ -770,10 +770,10 @@ directory, recursively, following all symbolic links.
 @item --
 @opindex --
 @cindex option delimiter
-Delimit the option list.  Later arguments, if any, are treated as
-operands even if they begin with @samp{-}.  For example, @samp{grep PAT --
--file1 file2} searches for the pattern PAT in the files named @file{-file1}
-and @file{file2}.
+Delimit the option list.  Any later argument is not treated as an
+option even if it begins with @samp{-}.  For example,
+@samp{grep -- -PAT -file1 file2} searches for the pattern @samp{-PAT}
+in the files named @file{-file1} and @file{file2}.
 
 @item --line-buffered
 @opindex --line-buffered
