@@ -71,6 +71,7 @@ else
 endif
 
 TESTS =						\
+  100k-entries					\
   backref					\
   backref-alt					\
   backref-multibyte-slow			\
