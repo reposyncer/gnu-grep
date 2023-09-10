@@ -42,7 +42,7 @@ noinst_HEADERS = grep.h kwset.h search.h system.h
 # But libgreputils.a must also follow $(LIBINTL), since libintl uses
 # replacement functions defined in libgreputils.a.
 LDADD = \
-  ../lib/libgreputils.a $(LIBINTL) ../lib/libgreputils.a $(LIBICONV) \
+  ../lib/libgreputils.a $(LIBINTL) ../lib/libgreputils.a \
   $(HARD_LOCALE_LIB) $(LIBC32CONV) \
   $(LIBSIGSEGV) $(LIBUNISTRING) $(MBRTOWC_LIB) $(SETLOCALE_NULL_LIB) \
   $(LIBTHREAD)

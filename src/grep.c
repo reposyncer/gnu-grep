@@ -45,7 +45,6 @@
 #include "grep.h"
 #include "hash.h"
 #include "intprops.h"
-#include "propername.h"
 #include "safe-read.h"
 #include "search.h"
 #include "c-strcase.h"

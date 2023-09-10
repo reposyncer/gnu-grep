@@ -42,7 +42,7 @@ AM_CFLAGS = $(WARN_CFLAGS) $(WERROR_CFLAGS)
 # Tell the linker to omit references to unused shared libraries.
 AM_LDFLAGS = $(IGNORE_UNUSED_LIBRARIES_CFLAGS)
 LDADD = ../lib/libgreputils.a $(LIBINTL) ../lib/libgreputils.a \
-  $(HARD_LOCALE_LIB) $(LIBC32CONV) $(LIBCSTACK) $(LIBICONV) \
+  $(HARD_LOCALE_LIB) $(LIBC32CONV) $(LIBCSTACK) \
   $(LIBSIGSEGV) $(LIBUNISTRING) $(MBRTOWC_LIB) $(SETLOCALE_NULL_LIB) \
   $(LIBTHREAD)
 
