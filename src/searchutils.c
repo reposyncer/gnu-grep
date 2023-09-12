@@ -115,7 +115,7 @@ mb_goback (char const **mb_start, idx_t *mbclen, char const *cur,
 
               if (long_enough)
                 {
-                  mbstate_t mbs = { 0 };
+                  mbstate_t mbs; mbszero (&mbs);
                   ptrdiff_t clen = imbrlen (cur - i, end - (cur - i), &mbs);
                   if (0 <= clen)
                     {
@@ -131,7 +131,7 @@ mb_goback (char const **mb_start, idx_t *mbclen, char const *cur,
     {
       /* In non-UTF-8 encodings, to find character boundaries one must
          in general scan forward from the start of the buffer.  */
-      mbstate_t mbs = { 0 };
+      mbstate_t mbs; mbszero (&mbs);
       ptrdiff_t clen;
 
       do
@@ -165,7 +165,7 @@ static idx_t
 wordchars_count (char const *buf, char const *end, bool countall)
 {
   idx_t n = 0;
-  mbstate_t mbs = { 0 };
+  mbstate_t mbs; mbszero (&mbs);
   while (n < end - buf)
     {
       unsigned char b = buf[n];

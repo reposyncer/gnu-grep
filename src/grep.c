@@ -761,7 +761,7 @@ buf_has_encoding_errors (char *buf, idx_t size)
   if (! unibyte_mask)
     return false;
 
-  mbstate_t mbs = { 0 };
+  mbstate_t mbs; mbszero (&mbs);
   ptrdiff_t clen;
 
   buf[size] = -1;
@@ -2235,7 +2235,7 @@ parse_grep_colors (void)
 static bool
 contains_encoding_error (char const *pat, idx_t patlen)
 {
-  mbstate_t mbs = { 0 };
+  mbstate_t mbs; mbszero (&mbs);
   ptrdiff_t charlen;
 
   for (idx_t i = 0; i < patlen; i += charlen)
@@ -2265,7 +2265,7 @@ setup_ok_fold (void)
       for (int n = case_folded_counterparts (wi, folded); 0 <= --n; )
         {
           char buf[MB_LEN_MAX];
-          mbstate_t s = { 0 };
+          mbstate_t s; mbszero (&s);
           if (c32rtomb (buf, folded[n], &s) != 1)
             {
               ok = -1;
@@ -2321,7 +2321,7 @@ fgrep_icase_charlen (char const *pat, idx_t patlen, mbstate_t *mbs)
 static bool
 fgrep_icase_available (char const *pat, idx_t patlen)
 {
-  mbstate_t mbs = {0,};
+  mbstate_t mbs; mbszero (&mbs);
 
   for (idx_t i = 0; i < patlen; )
     {
@@ -2341,7 +2341,7 @@ fgrep_to_grep_pattern (char **keys_p, idx_t *len_p)
 {
   idx_t len = *len_p;
   char *keys = *keys_p;
-  mbstate_t mb_state = { 0 };
+  mbstate_t mb_state; mbszero (&mb_state);
   char *new_keys = xnmalloc (len + 1, 2);
   char *p = new_keys;
 
@@ -2393,7 +2393,7 @@ try_fgrep_pattern (int matcher, char *keys, idx_t *len_p)
   char *new_keys = ximalloc (len + 1);
   char *p = new_keys;
   char const *q = keys;
-  mbstate_t mb_state = { 0 };
+  mbstate_t mb_state; mbszero (&mb_state);
 
   while (len != 0)
     {
