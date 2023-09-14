@@ -178,7 +178,7 @@ update_patterns (char *keys, idx_t dupfree_size, idx_t size,
 
       intptr_t dst_offset_1 = dst - keys + 1;
       int inserted = hash_insert_if_absent (pattern_table,
-                                            (void *) dst_offset_1, NULL);
+                                            (void *) dst_offset_1, nullptr);
       if (inserted)
         {
           if (inserted < 0)
@@ -425,17 +425,17 @@ color_cap_ne_fct (void)
 static const struct color_cap color_dict[] =
   {
     { "mt", &selected_match_color, color_cap_mt_fct }, /* both ms/mc */
-    { "ms", &selected_match_color, NULL }, /* selected matched text */
-    { "mc", &context_match_color,  NULL }, /* context matched text */
-    { "fn", &filename_color,       NULL }, /* filename */
-    { "ln", &line_num_color,       NULL }, /* line number */
-    { "bn", &byte_num_color,       NULL }, /* byte (sic) offset */
-    { "se", &sep_color,            NULL }, /* separator */
-    { "sl", &selected_line_color,  NULL }, /* selected lines */
-    { "cx", &context_line_color,   NULL }, /* context lines */
-    { "rv", NULL,                  color_cap_rv_fct }, /* -v reverses sl/cx */
-    { "ne", NULL,                  color_cap_ne_fct }, /* no EL on SGR_* */
-    { NULL, NULL,                  NULL }
+    { "ms", &selected_match_color, nullptr }, /* selected matched text */
+    { "mc", &context_match_color,  nullptr }, /* context matched text */
+    { "fn", &filename_color,       nullptr }, /* filename */
+    { "ln", &line_num_color,       nullptr }, /* line number */
+    { "bn", &byte_num_color,       nullptr }, /* byte (sic) offset */
+    { "se", &sep_color,            nullptr }, /* separator */
+    { "sl", &selected_line_color,  nullptr }, /* selected lines */
+    { "cx", &context_line_color,   nullptr }, /* context lines */
+    { "rv", nullptr,               color_cap_rv_fct }, /* -v reverses sl/cx */
+    { "ne", nullptr,               color_cap_ne_fct }, /* no EL on SGR_* */
+    { nullptr, nullptr,            nullptr }
   };
 
 /* Saved errno value from failed output functions on stdout.  */
@@ -503,57 +503,57 @@ enum
 /* Long options equivalences. */
 static struct option const long_options[] =
 {
-  {"basic-regexp",    no_argument, NULL, 'G'},
-  {"extended-regexp", no_argument, NULL, 'E'},
-  {"fixed-regexp",    no_argument, NULL, 'F'},
-  {"fixed-strings",   no_argument, NULL, 'F'},
-  {"perl-regexp",     no_argument, NULL, 'P'},
-  {"after-context", required_argument, NULL, 'A'},
-  {"before-context", required_argument, NULL, 'B'},
-  {"binary-files", required_argument, NULL, BINARY_FILES_OPTION},
-  {"byte-offset", no_argument, NULL, 'b'},
-  {"context", required_argument, NULL, 'C'},
-  {"color", optional_argument, NULL, COLOR_OPTION},
-  {"colour", optional_argument, NULL, COLOR_OPTION},
-  {"count", no_argument, NULL, 'c'},
-  {"devices", required_argument, NULL, 'D'},
-  {"directories", required_argument, NULL, 'd'},
-  {"exclude", required_argument, NULL, EXCLUDE_OPTION},
-  {"exclude-from", required_argument, NULL, EXCLUDE_FROM_OPTION},
-  {"exclude-dir", required_argument, NULL, EXCLUDE_DIRECTORY_OPTION},
-  {"file", required_argument, NULL, 'f'},
-  {"files-with-matches", no_argument, NULL, 'l'},
-  {"files-without-match", no_argument, NULL, 'L'},
-  {"group-separator", required_argument, NULL, GROUP_SEPARATOR_OPTION},
+  {"basic-regexp",    no_argument, nullptr, 'G'},
+  {"extended-regexp", no_argument, nullptr, 'E'},
+  {"fixed-regexp",    no_argument, nullptr, 'F'},
+  {"fixed-strings",   no_argument, nullptr, 'F'},
+  {"perl-regexp",     no_argument, nullptr, 'P'},
+  {"after-context", required_argument, nullptr, 'A'},
+  {"before-context", required_argument, nullptr, 'B'},
+  {"binary-files", required_argument, nullptr, BINARY_FILES_OPTION},
+  {"byte-offset", no_argument, nullptr, 'b'},
+  {"context", required_argument, nullptr, 'C'},
+  {"color", optional_argument, nullptr, COLOR_OPTION},
+  {"colour", optional_argument, nullptr, COLOR_OPTION},
+  {"count", no_argument, nullptr, 'c'},
+  {"devices", required_argument, nullptr, 'D'},
+  {"directories", required_argument, nullptr, 'd'},
+  {"exclude", required_argument, nullptr, EXCLUDE_OPTION},
+  {"exclude-from", required_argument, nullptr, EXCLUDE_FROM_OPTION},
+  {"exclude-dir", required_argument, nullptr, EXCLUDE_DIRECTORY_OPTION},
+  {"file", required_argument, nullptr, 'f'},
+  {"files-with-matches", no_argument, nullptr, 'l'},
+  {"files-without-match", no_argument, nullptr, 'L'},
+  {"group-separator", required_argument, nullptr, GROUP_SEPARATOR_OPTION},
   {"help", no_argument, &show_help, 1},
-  {"include", required_argument, NULL, INCLUDE_OPTION},
-  {"ignore-case", no_argument, NULL, 'i'},
-  {"no-ignore-case", no_argument, NULL, NO_IGNORE_CASE_OPTION},
-  {"initial-tab", no_argument, NULL, 'T'},
-  {"label", required_argument, NULL, LABEL_OPTION},
-  {"line-buffered", no_argument, NULL, LINE_BUFFERED_OPTION},
-  {"line-number", no_argument, NULL, 'n'},
-  {"line-regexp", no_argument, NULL, 'x'},
-  {"max-count", required_argument, NULL, 'm'},
+  {"include", required_argument, nullptr, INCLUDE_OPTION},
+  {"ignore-case", no_argument, nullptr, 'i'},
+  {"no-ignore-case", no_argument, nullptr, NO_IGNORE_CASE_OPTION},
+  {"initial-tab", no_argument, nullptr, 'T'},
+  {"label", required_argument, nullptr, LABEL_OPTION},
+  {"line-buffered", no_argument, nullptr, LINE_BUFFERED_OPTION},
+  {"line-number", no_argument, nullptr, 'n'},
+  {"line-regexp", no_argument, nullptr, 'x'},
+  {"max-count", required_argument, nullptr, 'm'},
 
-  {"no-filename", no_argument, NULL, 'h'},
-  {"no-group-separator", no_argument, NULL, GROUP_SEPARATOR_OPTION},
-  {"no-messages", no_argument, NULL, 's'},
-  {"null", no_argument, NULL, 'Z'},
-  {"null-data", no_argument, NULL, 'z'},
-  {"only-matching", no_argument, NULL, 'o'},
-  {"quiet", no_argument, NULL, 'q'},
-  {"recursive", no_argument, NULL, 'r'},
-  {"dereference-recursive", no_argument, NULL, 'R'},
-  {"regexp", required_argument, NULL, 'e'},
-  {"invert-match", no_argument, NULL, 'v'},
-  {"silent", no_argument, NULL, 'q'},
-  {"text", no_argument, NULL, 'a'},
-  {"binary", no_argument, NULL, 'U'},
-  {"unix-byte-offsets", no_argument, NULL, 'u'},
-  {"version", no_argument, NULL, 'V'},
-  {"with-filename", no_argument, NULL, 'H'},
-  {"word-regexp", no_argument, NULL, 'w'},
+  {"no-filename", no_argument, nullptr, 'h'},
+  {"no-group-separator", no_argument, nullptr, GROUP_SEPARATOR_OPTION},
+  {"no-messages", no_argument, nullptr, 's'},
+  {"null", no_argument, nullptr, 'Z'},
+  {"null-data", no_argument, nullptr, 'z'},
+  {"only-matching", no_argument, nullptr, 'o'},
+  {"quiet", no_argument, nullptr, 'q'},
+  {"recursive", no_argument, nullptr, 'r'},
+  {"dereference-recursive", no_argument, nullptr, 'R'},
+  {"regexp", required_argument, nullptr, 'e'},
+  {"invert-match", no_argument, nullptr, 'v'},
+  {"silent", no_argument, nullptr, 'q'},
+  {"text", no_argument, nullptr, 'a'},
+  {"binary", no_argument, nullptr, 'U'},
+  {"unix-byte-offsets", no_argument, nullptr, 'u'},
+  {"version", no_argument, nullptr, 'V'},
+  {"with-filename", no_argument, nullptr, 'H'},
+  {"word-regexp", no_argument, nullptr, 'w'},
   {0, 0, 0, 0}
 };
 
@@ -584,7 +584,7 @@ enum directories_type
 /* How to handle directories.  */
 static char const *const directories_args[] =
 {
-  "read", "recurse", "skip", NULL
+  "read", "recurse", "skip", nullptr
 };
 static enum directories_type const directories_types[] =
 {
@@ -986,7 +986,7 @@ fillbuf (idx_t save, struct stat const *st)
                 alloc_max = MAX (a, bufalloc + incr_min);
             }
 
-          newbuf = xpalloc (NULL, &bufalloc, incr_min, alloc_max, 1);
+          newbuf = xpalloc (nullptr, &bufalloc, incr_min, alloc_max, 1);
         }
 
       readbuf = ALIGN_TO (newbuf + 1 + save, pagesize);
@@ -1087,14 +1087,14 @@ static bool count_matches;	/* Count matching lines.  */
 static intmax_t max_count;	/* Max number of selected
                                    lines from an input file.  */
 static bool line_buffered;	/* Use line buffering.  */
-static char *label = NULL;      /* Fake filename for stdin */
+static char *label;		/* Fake filename for stdin */
 
 
 /* Internal variables to keep track of byte count, context, etc. */
 static intmax_t totalcc;	/* Total character count before bufbeg. */
 static char const *lastnl;	/* Pointer after last newline counted. */
 static char *lastout;		/* Pointer after last character output;
-                                   NULL if no character has been output
+                                   null if no character has been output
                                    or if it's conceptually before bufbeg. */
 static intmax_t outleft;	/* Maximum number of selected lines.  */
 static intmax_t pending;	/* Pending lines of output.
@@ -1211,7 +1211,7 @@ print_line_middle (char *beg, char *lim,
   idx_t match_size;
   ptrdiff_t match_offset;
   char *cur;
-  char *mid = NULL;
+  char *mid = nullptr;
   char *b;
 
   for (cur = beg;
@@ -1243,7 +1243,7 @@ print_line_middle (char *beg, char *lim,
             {
               char sep = out_invert ? SEP_CHAR_REJECTED : SEP_CHAR_SELECTED;
               if (! print_line_head (b, match_size, lim, sep))
-                return NULL;
+                return nullptr;
             }
           else
             {
@@ -1251,7 +1251,7 @@ print_line_middle (char *beg, char *lim,
               if (mid)
                 {
                   cur = mid;
-                  mid = NULL;
+                  mid = nullptr;
                 }
               fwrite_errno (cur, 1, b - cur);
             }
@@ -1315,7 +1315,7 @@ prline (char *beg, char *lim, char sep)
                      ? selected_match_color : context_match_color);
     }
   else
-    line_color = match_color = NULL; /* Shouldn't be used.  */
+    line_color = match_color = nullptr; /* Shouldn't be used.  */
 
   if ((only_matching && matching)
       || (color_option && (*line_color || *match_color)))
@@ -1466,7 +1466,7 @@ grepbuf (char *beg, char const *lim)
     {
       idx_t match_size;
       ptrdiff_t match_offset = execute (compiled_pattern, p, lim - p,
-                                        &match_size, NULL);
+                                        &match_size, nullptr);
       if (match_offset < 0)
         {
           if (!out_invert)
@@ -1584,7 +1584,7 @@ grep (int fd, struct stat const *st, bool *ineof)
       oldc = beg[-1];
       beg[-1] = eol;
       /* If rawmemrchr existed it could be used here, since we have ensured
-         that this use of memrchr is guaranteed never to return NULL.  */
+         that this use of memrchr is guaranteed never to return nullptr.  */
       lim = memrchr (beg - 1, eol, buflim - beg + 1);
       ++lim;
       beg[-1] = oldc;
@@ -1776,12 +1776,12 @@ drain_input (int fd, struct stat const *st)
     {
 #ifdef SPLICE_F_MOVE
       /* Should be faster, since it need not copy data to user space.  */
-      nbytes = splice (fd, NULL, STDOUT_FILENO, NULL,
+      nbytes = splice (fd, nullptr, STDOUT_FILENO, nullptr,
                        INITIAL_BUFSIZE, SPLICE_F_MOVE);
       if (0 <= nbytes || errno != EINVAL)
         {
           while (0 < nbytes)
-            nbytes = splice (fd, NULL, STDOUT_FILENO, NULL,
+            nbytes = splice (fd, nullptr, STDOUT_FILENO, nullptr,
                              INITIAL_BUFSIZE, SPLICE_F_MOVE);
           return nbytes == 0;
         }
@@ -1864,8 +1864,8 @@ grepdesc (int desc, bool command_line)
         suppressible_error (errno);
 
       fts_arg[0] = (char *) filename;
-      fts_arg[1] = NULL;
-      fts = fts_open (fts_arg, opts, NULL);
+      fts_arg[1] = nullptr;
+      fts = fts_open (fts_arg, opts, nullptr);
 
       if (!fts)
         xalloc_die ();
@@ -2132,7 +2132,7 @@ get_nondigit_option (int argc, char *const *argv, intmax_t *default_context)
   while (true)
     {
       opt = getopt_long (argc, (char **) argv, short_options,
-                         long_options, NULL);
+                         long_options, nullptr);
       if (! c_isdigit (opt))
         break;
 
@@ -2185,14 +2185,14 @@ parse_grep_colors (void)
   char *val;
 
   p = getenv ("GREP_COLORS"); /* Plural! */
-  if (p == NULL || *p == '\0')
+  if (!p || *p == '\0')
     return;
 
   /* Work off a writable copy.  */
   q = xstrdup (p);
 
   name = q;
-  val = NULL;
+  val = nullptr;
   /* From now on, be well-formed or you're gone.  */
   for (;;)
     if (*q == ':' || *q == '\0')
@@ -2214,7 +2214,7 @@ parse_grep_colors (void)
         if (c == '\0')
           return;
         name = q;
-        val = NULL;
+        val = nullptr;
       }
     else if (*q == '=')
       {
@@ -2223,7 +2223,7 @@ parse_grep_colors (void)
         *q++ = '\0'; /* Terminate name.  */
         val = q; /* Can be the empty string.  */
       }
-    else if (val == NULL)
+    else if (!val)
       q++; /* Accumulate name.  */
     else if (*q == ';' || c_isdigit (*q))
       q++; /* Accumulate val.  Protect the terminal from being sent crap.  */
@@ -2461,7 +2461,7 @@ try_fgrep_pattern (int matcher, char *keys, idx_t *len_p)
 int
 main (int argc, char **argv)
 {
-  char *keys = NULL;
+  char *keys = nullptr;
   idx_t keycc = 0, keyalloc = 0;
   int matcher = -1;
   int opt;
@@ -2499,7 +2499,7 @@ main (int argc, char **argv)
   init_localeinfo (&localeinfo);
 
   atexit (clean_up_stdout);
-  c_stack_action (NULL);
+  c_stack_action (nullptr);
 
   last_recursive = 0;
 
@@ -2827,7 +2827,7 @@ main (int argc, char **argv)
   if (show_version)
     {
       version_etc (stdout, getprogname (), PACKAGE_NAME, VERSION,
-                   (char *) NULL);
+                   (char *) nullptr);
       puts (_("Written by Mike Haertel and others; see\n"
               "<https://git.savannah.gnu.org/cgit/grep.git/tree/AUTHORS>."));
 #if HAVE_LIBPCRE
@@ -2921,7 +2921,7 @@ main (int argc, char **argv)
     {
       /* Legacy.  */
       char *userval = getenv ("GREP_COLOR");
-      if (userval != NULL && *userval != '\0')
+      if (userval && *userval)
         for (char *q = userval; *q == ';' || c_isdigit (*q); q++)
           if (!q[1])
             {
@@ -2980,8 +2980,8 @@ main (int argc, char **argv)
   /* We need one byte prior and one after.  */
   char eolbytes[3] = { 0, eolbyte, 0 };
   idx_t match_size;
-  skip_empty_lines = ((execute (compiled_pattern, eolbytes + 1, 1,
-                                &match_size, NULL) == 0)
+  skip_empty_lines = (!execute (compiled_pattern, eolbytes + 1, 1,
+                                &match_size, nullptr)
                       == out_invert);
 
   int num_operands = argc - optind;
@@ -3014,20 +3014,20 @@ main (int argc, char **argv)
     }
   else if (directories == RECURSE_DIRECTORIES && 0 < last_recursive)
     {
-      static char *const cwd_only[] = { (char *) ".", NULL };
+      static char *const cwd_only[] = { (char *) ".", nullptr };
       files = cwd_only;
       omit_dot_slash = true;
     }
   else
     {
-      static char *const stdin_only[] = { (char *) "-", NULL };
+      static char *const stdin_only[] = { (char *) "-", nullptr };
       files = stdin_only;
     }
 
   bool status = true;
   do
     status &= grep_command_line_arg (*files++);
-  while (*files != NULL);
+  while (*files);
 
   return errseen ? EXIT_TROUBLE : status;
 }

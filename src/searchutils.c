@@ -45,7 +45,7 @@ wordinit (void)
 kwset_t
 kwsinit (bool mb_trans)
 {
-  char *trans = NULL;
+  char *trans = nullptr;
 
   if (match_icase && (MB_CUR_MAX == 1 || mb_trans))
     {
@@ -216,6 +216,6 @@ wordchar_prev (char const *buf, char const *cur, char const *end)
   if (! localeinfo.multibyte || localeinfo.using_utf8 & ~(b >> 7))
     return sbwordchar[b];
   char const *p = buf;
-  cur -= mb_goback (&p, NULL, cur, end);
+  cur -= mb_goback (&p, nullptr, cur, end);
   return wordchar_next (cur, end);
 }

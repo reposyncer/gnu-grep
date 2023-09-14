@@ -50,7 +50,7 @@ void *
 Fcompile (char *pattern, idx_t size, reg_syntax_t ignored, bool exact)
 {
   kwset_t kwset;
-  char *buf = NULL;
+  char *buf = nullptr;
   idx_t bufalloc = 0;
 
   kwset = kwsinit (true);
@@ -71,7 +71,7 @@ Fcompile (char *pattern, idx_t size, reg_syntax_t ignored, bool exact)
                 {
                   free (buf);
                   bufalloc = len;
-                  buf = xpalloc (NULL, &bufalloc, 2, -1, 1);
+                  buf = xpalloc (nullptr, &bufalloc, 2, -1, 1);
                   buf[0] = eolbyte;
                 }
               memcpy (buf + 1, p, len);
@@ -96,7 +96,7 @@ Fcompile (char *pattern, idx_t size, reg_syntax_t ignored, bool exact)
   kwsearch->words = words;
   kwsearch->pattern = pattern;
   kwsearch->size = size;
-  kwsearch->re = NULL;
+  kwsearch->re = nullptr;
   return kwsearch;
 }
 
@@ -151,7 +151,7 @@ Fexecute (void *vcp, char const *buf, idx_t size, idx_t *match_size,
         goto success_in_beg_and_len;
       if (match_lines)
         {
-          len += start_ptr == NULL;
+          len += !start_ptr;
           goto success_in_beg_and_len;
         }
       if (! match_words)
@@ -199,7 +199,7 @@ Fexecute (void *vcp, char const *buf, idx_t size, idx_t *match_size,
                   end = buf + size;
 
                 if (0 <= EGexecute (kwsearch->re, beg, end - beg,
-                                    match_size, NULL))
+                                    match_size, nullptr))
                   goto success_match_words;
                 beg = end - 1;
                 break;

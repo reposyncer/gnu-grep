@@ -136,14 +136,14 @@ kwsalloc (char const *trans)
   kwset->words = 0;
   kwset->trie = obstack_alloc (&kwset->obstack, sizeof *kwset->trie);
   kwset->trie->accepting = 0;
-  kwset->trie->links = NULL;
-  kwset->trie->parent = NULL;
-  kwset->trie->next = NULL;
-  kwset->trie->fail = NULL;
+  kwset->trie->links = nullptr;
+  kwset->trie->parent = nullptr;
+  kwset->trie->next = nullptr;
+  kwset->trie->fail = nullptr;
   kwset->trie->depth = 0;
   kwset->trie->shift = 0;
   kwset->mind = IDX_MAX;
-  kwset->target = NULL;
+  kwset->target = nullptr;
   kwset->trans = trans;
   kwset->kwsexec = acexec;
 
@@ -198,14 +198,14 @@ kwsincr (kwset_t kwset, char const *text, idx_t len)
       if (!cur)
         {
           cur = obstack_alloc (&kwset->obstack, sizeof *cur);
-          cur->llink = NULL;
-          cur->rlink = NULL;
+          cur->llink = nullptr;
+          cur->rlink = nullptr;
           cur->trie = obstack_alloc (&kwset->obstack, sizeof *cur->trie);
           cur->trie->accepting = 0;
-          cur->trie->links = NULL;
+          cur->trie->links = nullptr;
           cur->trie->parent = trie;
-          cur->trie->next = NULL;
-          cur->trie->fail = NULL;
+          cur->trie->next = nullptr;
+          cur->trie->fail = nullptr;
           cur->trie->depth = trie->depth + 1;
           cur->trie->shift = 0;
           cur->label = label;
@@ -431,7 +431,7 @@ kwsprep (kwset_t kwset)
       new_kwset = kwsalloc (kwset->trans);
       new_kwset->kwsexec = bmexec;
       kwsincr (new_kwset, kwset->target, kwset->mind);
-      obstack_free (&kwset->obstack, NULL);
+      obstack_free (&kwset->obstack, nullptr);
       *kwset = *new_kwset;
       free (new_kwset);
     }
@@ -618,7 +618,7 @@ bm_delta2_search (char const **tpp, char const *ep, char const *sp,
 }
 
 /* Return the address of the first byte in the buffer S (of size N)
-   that matches the terminal byte specified by KWSET, or NULL if there
+   that matches the terminal byte specified by KWSET, or null if there
    is no match.  KWSET->gc1 should be nonnegative.  */
 static char const *
 memchr_kwset (char const *s, idx_t n, kwset_t kwset)
@@ -643,7 +643,7 @@ memchr_kwset (char const *s, idx_t n, kwset_t kwset)
             return memchr2 (s, kwset->gc1, kwset->gc1help, slim - s);
         }
     }
-  return NULL;
+  return nullptr;
 }
 
 /* Fast Boyer-Moore search (inlinable version).  */
@@ -725,7 +725,7 @@ bmexec_trans (kwset_t kwset, char const *text, idx_t size)
       d = d1[U((tp += d)[-1])];
       if (d != 0)
         continue;
-      if (bm_delta2_search (&tp, ep, sp, len, trans, gc1, gc2, NULL, kwset))
+      if (bm_delta2_search (&tp, ep, sp, len, trans, gc1, gc2, nullptr, kwset))
         return tp - text;
     }
 
@@ -907,6 +907,6 @@ kwsexec (kwset_t kwset, char const *text, idx_t size,
 void
 kwsfree (kwset_t kwset)
 {
-  obstack_free (&kwset->obstack, NULL);
+  obstack_free (&kwset->obstack, nullptr);
   free (kwset);
 }

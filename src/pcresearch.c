@@ -86,7 +86,7 @@ private_free (void *ptr, _GL_UNUSED void *unused)
 void
 Pprint_version (void)
 {
-  char *buf = ximalloc (pcre2_config (PCRE2_CONFIG_VERSION, NULL));
+  char *buf = ximalloc (pcre2_config (PCRE2_CONFIG_VERSION, nullptr));
   pcre2_config (PCRE2_CONFIG_VERSION, buf);
   printf (_("\ngrep -P uses PCRE2 %s\n"), buf);
   free (buf);
@@ -122,7 +122,7 @@ jit_exec (struct pcre_comp *pc, char const *subject, idx_t search_bytes,
             xalloc_die ();
           if (!pc->mcontext)
             pc->mcontext = pcre2_match_context_create (pc->gcontext);
-          pcre2_jit_stack_assign (pc->mcontext, NULL, pc->jit_stack);
+          pcre2_jit_stack_assign (pc->mcontext, nullptr, pc->jit_stack);
         }
       else if (e == PCRE2_ERROR_DEPTHLIMIT)
         {
@@ -158,7 +158,7 @@ Pcompile (char *pattern, idx_t size, reg_syntax_t ignored, bool exact)
   char *patlim = pattern + size;
   struct pcre_comp *pc = ximalloc (sizeof *pc);
   pcre2_general_context *gcontext = pc->gcontext
-    = pcre2_general_context_create (private_malloc, private_free, NULL);
+    = pcre2_general_context_create (private_malloc, private_free, nullptr);
   pcre2_compile_context *ccontext = pcre2_compile_context_create (gcontext);
 
   if (localeinfo.multibyte)
@@ -199,7 +199,7 @@ Pcompile (char *pattern, idx_t size, reg_syntax_t ignored, bool exact)
   pcre2_set_compile_extra_options (ccontext, extra_options);
 #endif
 
-  void *re_storage = NULL;
+  void *re_storage = nullptr;
   if (match_lines)
     {
 #ifndef PCRE2_EXTRA_MATCH_LINE
@@ -245,7 +245,7 @@ Pcompile (char *pattern, idx_t size, reg_syntax_t ignored, bool exact)
   free (re_storage);
   pcre2_compile_context_free (ccontext);
 
-  pc->mcontext = NULL;
+  pc->mcontext = nullptr;
   pc->data = pcre2_match_data_create_from_pattern (pc->cre, gcontext);
 
   /* Ignore any failure return from pcre2_jit_compile, as that merely
@@ -253,7 +253,7 @@ Pcompile (char *pattern, idx_t size, reg_syntax_t ignored, bool exact)
   pcre2_jit_compile (pc->cre, PCRE2_JIT_COMPLETE);
 
   /* The PCRE documentation says that a 32 KiB stack is the default.  */
-  pc->jit_stack = NULL;
+  pc->jit_stack = nullptr;
   pc->jit_stack_size = 32 << 10;
 
   pc->empty_match[false] = jit_exec (pc, "", 0, 0, PCRE2_NOTBOL);

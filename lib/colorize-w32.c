@@ -96,7 +96,7 @@ w32_sgr2attr (const char *sgr_seq)
     {
       if (*p == ';' || *p == '\0')
         {
-          code = strtol (s, NULL, 10);
+          code = strtol (s, nullptr, 10);
           s = p + (*p != '\0');
 
           switch (code)
