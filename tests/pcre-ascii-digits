@@ -3,7 +3,7 @@
 # With, grep-3.9, \d would match e.g., the multibyte Arabic digits.
 # The same applied to \D.
 #
-# Copyright (C) 2023 Free Software Foundation, Inc.
+# Copyright (C) 2023-2024 Free Software Foundation, Inc.
 #
 # Copying and distribution of this file, with or without modification,
 # are permitted in any medium without royalty provided the copyright
