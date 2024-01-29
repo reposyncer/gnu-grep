@@ -808,19 +808,21 @@ matches any single digit.
 Within a bracket expression, a
 .I "range expression"
 consists of two characters separated by a hyphen.
-It matches any single character that sorts between the two characters,
-inclusive, using the locale's collating sequence and character set.
-For example, in the default C locale,
+In the default C locale, it matches any single character that appears
+between the two characters in ASCII order, inclusive.
+For example,
 .B [a\-d]
 is equivalent to
 .BR [abcd] .
-Many locales sort characters in dictionary order, and in these locales
+In other locales the behavior is unspecified:
 .B [a\-d]
-is typically not equivalent to
-.BR [abcd] ;
-it might be equivalent to
-.BR [aBbCcDd] ,
-for example.
+might be equivalent to
+.B [abcd]
+or
+.B [aBbCcDd]
+or some other bracket expression,
+or it might fail to match any character, or the set of
+characters that it matches might be erratic, or it might be invalid.
 To obtain the traditional interpretation of bracket expressions,
 you can use the C locale by setting the
 .B LC_ALL

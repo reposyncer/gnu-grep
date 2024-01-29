@@ -1325,13 +1325,13 @@ encoding error.
 @cindex range expression
 Within a bracket expression, a @dfn{range expression} consists of two
 characters separated by a hyphen.
-It matches any single character that
-sorts between the two characters, inclusive.
-In the default C locale, the sorting sequence is the native character
-order; for example, @samp{[a-d]} is equivalent to @samp{[abcd]}.
-In other locales, the sorting sequence is not specified, and
-@samp{[a-d]} might be equivalent to @samp{[abcd]} or to
-@samp{[aBbCcDd]}, or it might fail to match any character, or the set of
+In the default C locale, it matches any single character that appears
+between the two characters in ASCII order, inclusive.
+For example, @samp{[a-d]} is equivalent to @samp{[abcd]}.
+In other locales the behavior is unspecified:
+@samp{[a-d]} might be equivalent to
+@samp{[abcd]} or @samp{[aBbCcDd]} or some other bracket expression,
+or it might fail to match any character, or the set of
 characters that it matches might be erratic, or it might be invalid.
 To obtain the traditional interpretation
 of bracket expressions, you can use the @samp{C} locale by setting the
@@ -1734,8 +1734,9 @@ A range expression outside the POSIX locale.  For example, in some
 locales @samp{[a-z]} might match some characters that are not
 lowercase letters, or might not match some lowercase letters, or might
 be invalid.  With GNU @command{grep} it is not documented whether
-these range expressions use native code points, or use the collating
-sequence specified by the @env{LC_COLLATE} category, or have some
+these range expressions use native code points, or use the collation
+sequence specified by the @env{LC_COLLATE} category, or use the
+collation ordering used by @command{sort} and @code{strcoll}, or have some
 other interpretation.  Outside the POSIX locale, it is portable to use
 @samp{[[:lower:]]} to match a lower-case letter, or
 @samp{[abcdefghijklmnopqrstuvwxyz]} to match an ASCII lower-case
