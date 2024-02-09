@@ -1558,7 +1558,11 @@ grep (int fd, struct stat const *st, bool *ineof)
           if (binary_files == WITHOUT_MATCH_BINARY_FILES)
             return 0;
           if (!count_matches)
-            done_on_match = out_quiet = true;
+            {
+              out_quiet = true;
+              if (max_count == INTMAX_MAX)
+                done_on_match = true;
+            }
           nlines_first_null = nlines;
           nul_zapper = eol;
           skip_nuls = skip_empty_lines;
@@ -2897,7 +2901,8 @@ main (int argc, char **argv)
   if ((exit_on_match | dev_null_output) || list_files != LISTFILES_NONE)
     {
       count_matches = false;
-      done_on_match = true;
+      if (max_count == INTMAX_MAX)
+        done_on_match = true;
     }
   out_quiet = count_matches | done_on_match;
 

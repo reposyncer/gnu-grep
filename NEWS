@@ -11,6 +11,9 @@ GNU grep NEWS                                    -*- outline -*-
     1
   [bug introduced in grep 3.11]
 
+  -mN where 1 < N no longer mistakenly lseeks to end of input merely
+  because standard output is /dev/null.
+
 ** Changes in behavior
 
   On Windows platforms and on AIX in 32-bit mode, grep now supports

@@ -12,4 +12,10 @@ echo x > exp || framework_failure_
 yes x | timeout 10 grep -m1 x > out || fail=1
 compare exp out || fail=1
 
+# Make sure -m2 stops reading even when output is /dev/null.
+# In grep 3.11, it would continue reading.
+printf 'x\nx\nx\n' >in || framework_failure
+(grep -m2 x >/dev/null && head -n1) <in >out || fail=1
+compare exp out || fail=1
+
 Exit $fail
