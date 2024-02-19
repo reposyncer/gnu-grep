@@ -20,7 +20,7 @@
 
 #define SEARCH_INLINE _GL_EXTERN_INLINE
 #define SYSTEM_INLINE _GL_EXTERN_INLINE
-#include "search.h"
+#include <search.h>
 
 #include <uchar.h>
 

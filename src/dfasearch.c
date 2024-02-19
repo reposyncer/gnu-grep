@@ -20,7 +20,7 @@
 
 #include <config.h>
 #include "intprops.h"
-#include "search.h"
+#include <search.h>
 #include "die.h"
 #include <error.h>
 

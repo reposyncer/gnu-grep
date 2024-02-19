@@ -18,7 +18,7 @@
 
 #include <config.h>
 
-#include "search.h"
+#include <search.h>
 #include "die.h"
 
 #include <stdckdint.h>

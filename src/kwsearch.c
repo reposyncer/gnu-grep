@@ -19,7 +19,7 @@
 /* Written August 1992 by Mike Haertel. */
 
 #include <config.h>
-#include "search.h"
+#include <search.h>
 
 /* A compiled -F pattern list.  */
 
