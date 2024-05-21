@@ -23,6 +23,7 @@
 .	\}
 .\}
 .
+.as la
 .if !\w|\*(la| \{\
 .\" groff an-ext.tmac does not seem to be in use, so define the parts of
 .\" it that are used below.  For a copy of groff an-ext.tmac, please see:
@@ -245,7 +246,7 @@ If this option is used multiple times or is combined with the
 option, search for all patterns given.
 The empty file contains zero patterns, and therefore matches nothing.
 If
-.IR FILE
+.I FILE
 is
 .B \-
 , read patterns from standard input.
@@ -674,7 +675,7 @@ whose base name matches
 Ignore any redundant trailing slashes in
 .IR GLOB .
 .TP
-.BR \-I
+.B \-I
 Process a binary file as if it did not contain matching data; this is
 equivalent to the
 .B \-\^\-binary\-files=without\-match
@@ -749,7 +750,7 @@ Like the
 or
 .B \-\^\-null
 option, this option can be used with commands like
-.B sort -z
+.B "sort \-z"
 to process arbitrary file names.
 .
 .SH "REGULAR EXPRESSIONS"
