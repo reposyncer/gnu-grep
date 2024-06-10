@@ -57,6 +57,7 @@ PKG_PROG_PKG_CONFIG([0.9.0])
 # so don't worry about this common bug,
 # as working around it would merely slow grep down.
 gl_cv_func_mbrtowc_empty_input='assume yes'
+gl_cv_func_mbrlen_empty_input='assume yes'
 
 dnl Checks for typedefs, structures, and compiler characteristics.
 gl_INIT
