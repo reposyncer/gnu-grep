@@ -52,6 +52,7 @@
 /tests/cspatfile
 /tests/ere.script
 /tests/get-mb-cur-max
+/tests/init.sh
 /tests/khadafy.out
 /tests/patfile
 /tests/spencer1.script
