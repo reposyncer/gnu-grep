@@ -10,7 +10,7 @@
 cz=cs_CZ.UTF-8
 
 # If cs_CZ.UTF-8 locale doesn't work, skip this test.
-LC_ALL=$cz locale -k LC_CTYPE 2>/dev/null | grep -q charmap.*UTF-8 \
+test "`LC_ALL=$cz locale charmap 2>/dev/null`" = UTF-8 \
   || skip_ this system lacks the $cz locale
 
 # If matching is done in single-byte mode, skip this test too

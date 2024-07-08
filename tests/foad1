@@ -150,7 +150,7 @@ Exit $failures
 # The rest of this file is meant to be executed under this locale.
 LC_ALL=cs_CZ.UTF-8; export LC_ALL
 # If the UTF-8 locale doesn't work, skip these tests silently.
-locale -k LC_CTYPE 2>/dev/null | grep -q "charmap.*UTF-8" || Exit $failures
+test "`locale charmap 2>/dev/null`" = UTF-8 || Exit $failures
 
 # Test character class erroneously matching a '[' character.
 grep_test "[/" "" "[[:alpha:]]" -E
