@@ -6,8 +6,8 @@ on:
   workflow_dispatch:  # This allows the workflow to be manually triggered
 
 env:
-  NAME: repo-name-here
-  URL: repo-url-here
+  NAME: grep
+  URL: https://git.savannah.gnu.org/git/grep.git
 
 jobs:
   sync-repo:
