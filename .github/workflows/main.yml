@@ -1,0 +1,38 @@
+name: Sync repository
+
+on:
+  schedule:
+    - cron: '0 0 * * 1'  # This will run at 00:00 UTC every Monday
+  workflow_dispatch:  # This allows the workflow to be manually triggered
+
+env:
+  NAME: repo-name-here
+  URL: repo-url-here
+
+jobs:
+  sync-repo:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v2
+      with:
+        fetch-depth: 0  # Fetch all history for all branches and tags
+
+    - name: Set Git Configurations
+      run: |
+        git config user.name "GitHub Actions"
+        git config user.email "actions@github.com"
+
+    - name: Add remote and fetch all branches and tags
+      run: |
+        git remote add ${{ env.NAME }} ${{ env.URL }}
+        git fetch ${{ env.NAME }} --tags
+        git fetch ${{ env.NAME }} '+refs/heads/*:refs/remotes/${{ env.NAME }}/*'
+
+    - name: Push all branches and tags to origin
+      run: |
+        for branch in $(git branch -r | grep '${{ env.NAME }}/' | sed 's/${{ env.NAME }}\///'); do
+          git push origin ${{ env.NAME }}/$branch:refs/heads/$branch --force
+        done
+        git push --tags --force
