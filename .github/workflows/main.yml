@@ -2,7 +2,7 @@ name: Sync repository
 
 on:
   schedule:
-    - cron: '0 0 * * 1'  # This will run at 00:00 UTC every Monday
+    - cron: '0 0 * * *'  # This will run at 00:00 UTC every Monday
   workflow_dispatch:  # This allows the workflow to be manually triggered
 
 env:
