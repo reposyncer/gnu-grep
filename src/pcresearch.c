@@ -201,13 +201,13 @@ Pcompile (char *pattern, idx_t size, reg_syntax_t ignored, bool exact)
   if (match_lines)
     {
 #ifndef PCRE2_EXTRA_MATCH_LINE
-      static char const /* These sizes omit trailing NUL.  */
-        xprefix[4] = "^(?:", xsuffix[2] = ")$";
-      idx_t re_size = size + sizeof xprefix + sizeof xsuffix;
+      static char const *const xprefix = "^(?:";
+      static char const *const xsuffix = ")$";
+      idx_t re_size = size + strlen (xprefix) + strlen (xsuffix);
       char *re = re_storage = ximalloc (re_size);
-      char *rez = mempcpy (re, xprefix, sizeof xprefix);
+      char *rez = mempcpy (re, xprefix, strlen (xprefix));
       rez = mempcpy (rez, pattern, size);
-      memcpy (rez, xsuffix, sizeof xsuffix);
+      memcpy (rez, xsuffix, strlen (xsuffix));
       pattern = re;
       size = re_size;
 #endif
@@ -216,13 +216,13 @@ Pcompile (char *pattern, idx_t size, reg_syntax_t ignored, bool exact)
     {
       /* PCRE2_EXTRA_MATCH_WORD is incompatible with grep -w;
          do things the grep way.  */
-      static char const /* These sizes omit trailing NUL.  */
-        wprefix[10] = "(?<!\\w)(?:", wsuffix[7] = ")(?!\\w)";
-      idx_t re_size = size + sizeof wprefix + sizeof wsuffix;
+      static char const *const wprefix = "(?<!\\w)(?:";
+      static char const *const wsuffix = ")(?!\\w)";
+      idx_t re_size = size + strlen (wprefix) + strlen (wsuffix);
       char *re = re_storage = ximalloc (re_size);
-      char *rez = mempcpy (re, wprefix, sizeof wprefix);
+      char *rez = mempcpy (re, wprefix, strlen (wprefix));
       rez = mempcpy (rez, pattern, size);
-      memcpy (rez, wsuffix, sizeof wsuffix);
+      memcpy (rez, wsuffix, strlen (wsuffix));
       pattern = re;
       size = re_size;
     }
