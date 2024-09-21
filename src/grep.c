@@ -872,6 +872,7 @@ static int bufdesc;		/* File descriptor. */
 static char *bufbeg;		/* Beginning of user-visible stuff. */
 static char *buflim;		/* Limit of user-visible stuff. */
 static idx_t pagesize;		/* alignment of memory pages */
+static idx_t good_readsize;	/* good size to pass to 'read' */
 static off_t bufoffset;		/* Read offset.  */
 static off_t after_last_match;	/* Pointer after last matching line that
                                    would have been output if we were
@@ -880,8 +881,15 @@ static bool skip_nuls;		/* Skip '\0' in data.  */
 static bool skip_empty_lines;	/* Skip empty lines in data.  */
 static intmax_t totalnl;	/* Total newline count before lastnl. */
 
-/* Initial buffer size, not counting slop. */
-enum { INITIAL_BUFSIZE = 96 * 1024 };
+/* Minimum value for good_readsize.
+   If it's too small, there are more syscalls;
+   if too large, it wastes memory and likely cache.
+   Use 96 KiB as it gave good results in a benchmark in 2018
+   (see 2018-09-06 commit labeled "grep: triple initial buffer size: 32k->96k")
+   even though the same benchmark in 2024 found no significant
+   difference for values from 32 KiB to 1024 KiB on Ubuntu 24.04.1 LTS
+   with an Intel Xeon W-1350.  */
+enum { GOOD_READSIZE_MIN = 96 * 1024 };
 
 /* Return VAL aligned to the next multiple of ALIGNMENT.  VAL can be
    an integer or a pointer.  Both args must be free of side effects.  */
@@ -946,9 +954,9 @@ fillbuf (idx_t save, struct stat const *st)
 {
   char *readbuf;
 
-  /* After BUFLIM, we need room for at least a page of data plus a
+  /* After BUFLIM, we need room for a good-sized read plus a
      trailing uword.  */
-  idx_t min_after_buflim = pagesize + uword_size;
+  idx_t min_after_buflim = good_readsize + uword_size;
 
   if (min_after_buflim <= buffer + bufalloc - buflim)
     readbuf = buflim;
@@ -957,8 +965,8 @@ fillbuf (idx_t save, struct stat const *st)
       char *newbuf;
 
       /* For data to be searched we need room for the saved bytes,
-         plus at least a page of data to read.  */
-      idx_t minsize = save + pagesize;
+         plus at least a good-sized read.  */
+      idx_t minsize = save + good_readsize;
 
       /* Add enough room so that the buffer is aligned and has room
          for byte sentinels fore and aft, and so that a uword can
@@ -1001,15 +1009,12 @@ fillbuf (idx_t save, struct stat const *st)
 
   clear_asan_poison ();
 
-  idx_t readsize = buffer + bufalloc - uword_size - readbuf;
-  readsize -= readsize % pagesize;
-
   ptrdiff_t fillsize;
   bool cc = true;
 
   while (true)
     {
-      fillsize = safe_read (bufdesc, readbuf, readsize);
+      fillsize = safe_read (bufdesc, readbuf, good_readsize);
       if (fillsize < 0)
         {
           fillsize = 0;
@@ -1769,12 +1774,12 @@ drain_input (int fd, struct stat const *st)
 #ifdef SPLICE_F_MOVE
       /* Should be faster, since it need not copy data to user space.  */
       nbytes = splice (fd, nullptr, STDOUT_FILENO, nullptr,
-                       INITIAL_BUFSIZE, SPLICE_F_MOVE);
+                       good_readsize, SPLICE_F_MOVE);
       if (0 <= nbytes || errno != EINVAL)
         {
           while (0 < nbytes)
             nbytes = splice (fd, nullptr, STDOUT_FILENO, nullptr,
-                             INITIAL_BUFSIZE, SPLICE_F_MOVE);
+                             good_readsize, SPLICE_F_MOVE);
           return nbytes == 0;
         }
 #endif
@@ -2994,7 +2999,8 @@ main (int argc, char **argv)
   if (! (0 < psize && psize <= (IDX_MAX - uword_size) / 2))
     abort ();
   pagesize = psize;
-  bufalloc = ALIGN_TO (INITIAL_BUFSIZE, pagesize) + pagesize + uword_size;
+  good_readsize = ALIGN_TO (GOOD_READSIZE_MIN, pagesize);
+  bufalloc = good_readsize + pagesize + uword_size;
   buffer = ximalloc (bufalloc);
 
   if (fts_options & FTS_LOGICAL && devices == READ_COMMAND_LINE_DEVICES)
