@@ -165,14 +165,19 @@ if test $gl_gcc_warnings != no; then
   AC_SUBST([GNULIB_WARN_CFLAGS])
 
   # For gnulib-tests, the set is slightly smaller still.
-  nw=
-  nw="$nw -Wstrict-prototypes"
   # It's not worth being this picky about test programs.
-  nw="$nw -Wsuggest-attribute=const"
-  nw="$nw -Wsuggest-attribute=pure"
-  nw="$nw -Wsuggest-attribute=format"
+  nw=
   nw="$nw -Wformat-truncation=2"    # False alarm in strerror_r.c
+  nw="$nw -Wmissing-declarations"
+  nw="$nw -Wmissing-prototypes"
+  nw="$nw -Wmissing-variable-declarations"
+  nw="$nw -Wnull-dereference"
   nw="$nw -Wold-style-definition"
+  nw="$nw -Wstrict-prototypes"
+  nw="$nw -Wsuggest-attribute=cold"
+  nw="$nw -Wsuggest-attribute=const"
+  nw="$nw -Wsuggest-attribute=format"
+  nw="$nw -Wsuggest-attribute=pure"
 
   # Disable to avoid warnings in e.g., test-intprops.c and test-limits-h.c
   # due to overlong expansions like this:
