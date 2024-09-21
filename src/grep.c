@@ -1004,13 +1004,13 @@ fillbuf (idx_t save, struct stat const *st)
   idx_t readsize = buffer + bufalloc - uword_size - readbuf;
   readsize -= readsize % pagesize;
 
-  idx_t fillsize;
+  ptrdiff_t fillsize;
   bool cc = true;
 
   while (true)
     {
       fillsize = safe_read (bufdesc, readbuf, readsize);
-      if (fillsize == SAFE_READ_ERROR)
+      if (fillsize < 0)
         {
           fillsize = 0;
           cc = false;
@@ -1790,7 +1790,7 @@ drain_input (int fd, struct stat const *st)
 #endif
     }
   while ((nbytes = safe_read (fd, buffer, bufalloc)))
-    if (nbytes == SAFE_READ_ERROR)
+    if (nbytes < 0)
       return false;
   return true;
 }
