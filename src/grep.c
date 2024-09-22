@@ -1501,9 +1501,6 @@ grep (int fd, struct stat const *st, bool *ineof)
 {
   intmax_t nlines, i;
   idx_t residue, save;
-  char oldc;
-  char *beg;
-  char *lim;
   char eol = eolbyte;
   char nul_zapper = '\0';
   bool done_on_match_0 = done_on_match;
@@ -1570,7 +1567,7 @@ grep (int fd, struct stat const *st, bool *ineof)
       if (lastout)
         lastout = bufbeg;
 
-      beg = bufbeg + save;
+      char *beg = bufbeg + save;
 
       /* no more data to scan (eof) except for maybe a residue -> break */
       if (beg == buflim)
@@ -1583,16 +1580,9 @@ grep (int fd, struct stat const *st, bool *ineof)
 
       /* Determine new residue (the length of an incomplete line at the end of
          the buffer, 0 means there is no incomplete last line).  */
-      oldc = beg[-1];
-      beg[-1] = eol;
-      /* If rawmemrchr existed it could be used here, since we have ensured
-         that this use of memrchr is guaranteed never to return nullptr.  */
-      lim = memrchr (beg - 1, eol, buflim - beg + 1);
-      ++lim;
-      beg[-1] = oldc;
-      if (lim == beg)
-        lim = beg - residue;
+      char *last_eol = memrchr (beg, eol, buflim - beg);
       beg -= residue;
+      char *lim = last_eol ? last_eol + 1 : beg;
       residue = buflim - lim;
 
       if (beg < lim)
