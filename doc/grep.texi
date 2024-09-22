@@ -631,9 +631,11 @@ When some output is suppressed, @command{grep} follows any output
 with a message to standard error saying that a binary file matches.
 
 If @var{type} is @samp{without-match},
-when @command{grep} discovers null input binary data
-it assumes that the rest of the file does not match;
+when @command{grep} discovers null binary data in an input file
+it assumes that any unprocessed input does not match;
 this is equivalent to the @option{-I} option.
+In this case the region of unprocessed input starts no later than the
+null binary data, and continues to end of file.
 
 If @var{type} is @samp{text},
 @command{grep} processes binary data as if it were text;
@@ -648,6 +650,16 @@ match @samp{q} immediately followed by a null byte, even though this
 is not matched when @var{type} is @samp{text}.  Conversely, when
 @var{type} is @samp{binary} the pattern @samp{.} (period) might not
 match a null byte.
+
+The heuristic that @command{grep} uses to intuit whether input is
+binary is specific to @command{grep} and may well be unsuitable for
+other applications, as it depends on command-line options, on locale,
+and on hardware and operating system characteristics such as system
+page size and input buffering.  For example, if the input consists of
+a matching text line followed by nonmatching data that contains a null
+byte, @command{grep} might either output the matching line or treat
+the file as binary, depending on whether the unprocessed input happens
+to include the matching text line.
 
 @emph{Warning:} The @option{-a} (@option{--binary-files=text}) option
 might output binary garbage, which can have nasty side effects if the
@@ -2004,7 +2016,7 @@ Note that on some platforms,
 except the available memory.
 
 @item
-Why does @command{grep} report ``Binary file matches''?
+Why does @command{grep} report ``binary file matches''?
 
 If @command{grep} listed all matching ``lines'' from a binary file, it
 would probably generate output that is not useful, and it might even
