@@ -37,8 +37,11 @@ returns_ 2 grep --line-buffered -v '^$' <in >/dev/full 2>err1 \
 returns_ 2 grep -v '^$' <in >/dev/full 2>err2 \
     || framework_failure_
 
+# disk-full error with -q and --help
+returns_ 2 grep -q --help >/dev/full 2>err3 || fail=1
+
 # ensure each error message file contains a 'write error' with additional text
-for f in err1 err2 ;
+for f in err1 err2 err3 ;
 do
     grep -Eiq '^[^:]*: write error: [a-z]+' $f \
         || {
@@ -49,7 +52,9 @@ do
 done
 
 # These messages should be identical
-compare err1 err2 \
-    || { warn_ "err1,err2 contain different error messages" ; fail=1 ; }
+for f in err2 err3; do
+  compare err1 $f \
+    || { warn_ "err1,$f contain different error messages" ; fail=1 ; }
+done
 
 Exit $fail

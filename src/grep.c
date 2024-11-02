@@ -436,7 +436,11 @@ static const struct color_cap color_dict[] =
     { nullptr, nullptr,            nullptr }
   };
 
-/* Saved errno value from failed output functions on stdout.  */
+/* Saved errno value from failed output functions on stdout.
+   prline polls this to decide whether to die.
+   Setting it to nonzero just before exiting can prevent clean_up_stdout
+   from misbehaving on a buggy OS where 'close (STDOUT_FILENO)' fails
+   with EACCES.  */
 static int stdout_errno;
 
 static void
@@ -1490,7 +1494,10 @@ grepbuf (char *beg, char const *lim)
           if (!outleft || done_on_match)
             {
               if (exit_on_match)
-                exit (errseen ? exit_failure : EXIT_SUCCESS);
+                {
+                  stdout_errno = -1;
+                  exit (EXIT_SUCCESS);
+                }
               break;
             }
         }
@@ -2696,7 +2703,6 @@ main (int argc, char **argv)
 
       case 'q':
         exit_on_match = true;
-        exit_failure = 0;
         break;
 
       case 'R':
