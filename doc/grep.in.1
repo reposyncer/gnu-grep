@@ -142,30 +142,33 @@ grep \- print lines that match patterns
 .
 .SH SYNOPSIS
 .B grep
-.RI [ OPTION .\|.\|.]\&
+.RI [ OPTION ].\|.\|.\&
 .I PATTERNS
-.RI [ FILE .\|.\|.]
+.RI [ FILE ].\|.\|.
 .br
 .B grep
-.RI [ OPTION .\|.\|.]\&
+.RI [ OPTION ].\|.\|.\&
 .B \-e
 .I PATTERNS
 \&.\|.\|.\&
-.RI [ FILE .\|.\|.]
+.RI [ FILE ].\|.\|.
 .br
 .B grep
-.RI [ OPTION .\|.\|.]\&
+.RI [ OPTION ].\|.\|.\&
 .B \-f
 .I PATTERN_FILE
 \&.\|.\|.\&
-.RI [ FILE .\|.\|.]
+.RI [ FILE ].\|.\|.
 .
 .SH DESCRIPTION
 .B grep
-searches for
-.I PATTERNS
-in each
+searches for patterns in each
 .IR FILE .
+In the synopsis's first form, which is used if no
+.B \-e
+or
+.B \-f
+options are present, the first operand
 .I PATTERNS
 is one or more patterns separated by newline characters, and
 .B grep

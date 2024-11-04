@@ -109,7 +109,7 @@ there is no way to match newline characters in a text.
 The general synopsis of the @command{grep} command line is
 
 @example
-grep [@var{option}...] [@var{patterns}] [@var{file}...]
+grep [@var{option}]@dots{} [@var{patterns}] [@var{file}]@dots{}
 @end example
 
 @noindent
@@ -714,7 +714,7 @@ immediately after a slash (@samp{/}) in the name.
 When searching recursively, skip any subfile whose base
 name matches @var{glob}; the base name is the part after the last
 slash.  A pattern can use
-@samp{*}, @samp{?}, and @samp{[}...@samp{]} as wildcards,
+@samp{*}, @samp{?}, and @samp{[}@dots{}@samp{]} as wildcards,
 and @code{\} to quote a wildcard or backslash character literally.
 
 @item --exclude-from=@var{file}
@@ -903,7 +903,7 @@ for permitted values and their meanings as character attributes.)
 These substring values are integers in decimal representation
 and can be concatenated with semicolons.
 @command{grep} takes care of assembling the result
-into a complete SGR sequence (@samp{\33[}...@samp{m}).
+into a complete SGR sequence (@samp{\33[}@dots{}@samp{m}).
 Common values to concatenate include
 @samp{1} for bold,
 @samp{4} for underline,
@@ -1016,7 +1016,7 @@ or when EL is too slow or causes too much flicker.
 The default is false (i.e., the capability is omitted).
 @end table
 
-Note that boolean capabilities have no @samp{=}... part.
+Note that boolean capabilities have no @samp{=}@dots{} part.
 They are omitted (i.e., false) by default and become true when specified.
 
 
